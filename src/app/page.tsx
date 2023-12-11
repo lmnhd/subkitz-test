@@ -1,11 +1,11 @@
 "use client"
 import React, { useEffect, useState } from "react";
+import { Button } from "@aws-amplify/ui-react";
 import * as cdk from '@aws-cdk/core'
 import { list } from "aws-amplify/storage";
 import Image from 'next/image'
 //import { dbClient } from "@/lib/dynamo";
 import { withAuthenticator } from "@aws-amplify/ui-react";
-import { Button } from "@aws-amplify/ui-react";
 import { Inter } from 'next/font/google'
 import * as Tone from "tone";
 import { Howl, Howler } from "howler";
@@ -19,7 +19,7 @@ function Home() {
   const [soundList, setSoundList] = useState<any>(null);
   const [audio, setAudio] = useState<any>(null);
   const [player1, setPlayer1] = useState<Tone.Player>(
-    new Tone.Player().toDestination()
+   // new Tone.Player().toDestination()
   );
   //const dynamo = dbClient();
   
@@ -29,7 +29,7 @@ function Home() {
      const res = await getList();
       setSoundList(res);
       console.log("res", res);
-
+      setPlayer1(new Tone.Player().toDestination());
       // const data = dynamo
       // console.log("data", data);
     };
@@ -108,7 +108,8 @@ function Home() {
         return <Button
         key={sound}
         className="w-1/2 text-lg text-white"
-        onClick={() => previewSound(sound)}>
+        onClick={() => previewSound(sound)}
+       >
           {sound}
         </Button>
      })}
