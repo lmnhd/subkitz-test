@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import * as cdk from '@aws-cdk/core'
 import { list } from "aws-amplify/storage";
 import Image from 'next/image'
-import { dbClient } from "@/lib/dynamo";
+//import { dbClient } from "@/lib/dynamo";
 import { withAuthenticator } from "@aws-amplify/ui-react";
 import { Button } from "@aws-amplify/ui-react";
 import { Inter } from 'next/font/google'
@@ -21,7 +21,7 @@ function Home() {
   const [player1, setPlayer1] = useState<Tone.Player>(
     new Tone.Player().toDestination()
   );
-  const dynamo = dbClient();
+  //const dynamo = dbClient();
   
 
   useEffect(() => {
@@ -115,5 +115,5 @@ function Home() {
     </main>
   )
 }
-export default withAuthenticator(Home)
+export default Home
 //export default Home;
