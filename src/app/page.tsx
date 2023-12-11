@@ -104,7 +104,7 @@ function Home() {
      onChange={check}
      /> */}
 
-     {soundList && soundList.map((sound) => {
+     {soundList && soundList.map((sound:any) => {
         return <Button
         key={sound}
         className="w-1/2 text-lg text-white"
