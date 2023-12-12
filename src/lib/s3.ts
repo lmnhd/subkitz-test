@@ -30,7 +30,6 @@ export const getList = async () => {
     
 }
 
-
 export async function getS3URL(s3Path: string){
     const { url } = await getUrl({
         key: s3Path,
