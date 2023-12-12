@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { AmplifyGraphqlApi, AmplifyGraphqlDefinition } from '@aws-amplify/graphql-api-construct';
-import path = require('path');
+import * as path from 'path';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class GqlStack extends cdk.Stack {
