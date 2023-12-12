@@ -1,0 +1,83 @@
+# name: a.string(),
+#       s3Path: a.string(),
+#       description: a.string(),
+#       Genre: a.enum([
+#         "hiphop",
+#         "trap",
+#         "rnb",
+#         "pop",
+#         "rock",
+#         "jazz",
+#         "soul",
+#         "funk",
+#         "electronic",
+#         "experimental",
+#         "world",
+#         "fx",
+#       ]), //hiphop, trap, rnb, pop, rock, jazz, soul, funk, electronic, experimental, world, fx
+#       tags: a.string().array(),
+#       drum: a.enum([
+#         "sub",
+#         "kick",
+#         "snare",
+#         "ohat",
+#         "chat",
+#         "cymbal",
+#         "tom",
+#         "perc",
+#         "shaker",
+#         "clave",
+#         "stick",
+#         "bell",
+#         "conga",
+#         "whistle",
+#         "femvox",
+#         "malevox",
+#         "clap",
+#         "ride",
+#         "rim",
+#         "nome",
+#       ]), 
+#       //sub, kick, snare, hat, cymbal, tom, perc
+#       hygiene: a.enum(["clean", "dirty"]), //clean, dirty
+#       length: a.enum(["short", "mid", "long"]), //short, mid, long
+#       pitchRange: a.enum(["low", "mid", "high"]), //low, mid, high
+#       //genres: a.hasMany("string"), //hiphop, trap, rnb, pop, rock, jazz, soul, funk, electronic, experimental, world, fx
+#       mix: a.enum(["dry", "wet"]), //dry, wet
+#       loudness: a.enum(["soft", "mid", "loud"]), //soft, mid, loud
+#       decadeStyle: a.enum([
+#         "fifties",
+#         "sixties",
+#         "seventies",
+#         "eighties",
+#         "nineties",
+#         "twothousands",
+#         "tens",
+#         "twenties",
+#         "thirties",
+#         "spaceage"
+#       ]), //50s, 60s, 70s, 80s, 90s, 00s, 10s, 20s
+#       sourceGen1: a.enum(["analog", "digital"]), //analog, digital
+#       sourceGen2: a.enum(["organic", "synthetic"]), // organic, synthetic
+#       reversed: a.boolean().default(false),
+
+type Sample @model @auth(rules: [{ allow: public }]) 
+{
+    id: ID!
+    name: String!
+    s3Path: String!
+    description: String
+    genre: String
+    tags: [String]
+    drum: String
+    hygiene: String
+    length: String
+    pitchRange: String
+    mix: String
+    loudness: String
+    decadeStyle: String
+    sourceGen1: String
+    sourceGen2: String
+    reversed: Boolean!
+    owner: String
+}

@@ -1,32 +1,41 @@
-"use client"
+"use client";
 import React, { useEffect, useState } from "react";
 import { Button } from "@aws-amplify/ui-react";
-import * as cdk from '@aws-cdk/core'
+import { generateClient } from "aws-amplify/api";
+import { createSample, deleteSample, updateSample } from "@/graphql/mutations";
+import {Amplify} from "aws-amplify";
+import { listSamples } from "@/graphql/queries";
+import * as cdk from "@aws-cdk/core";
 import { list } from "aws-amplify/storage";
-import Image from 'next/image'
+import Image from "next/image";
 //import { dbClient } from "@/lib/dynamo";
 import { withAuthenticator } from "@aws-amplify/ui-react";
-import { Inter } from 'next/font/google'
+import { Inter } from "next/font/google";
 import * as Tone from "tone";
 import { Howl, Howler } from "howler";
 import { downloadToMemory, getList, getS3URL } from "@/lib/s3";
 
-
-
-
-//Amplify.configure(config)
+Amplify.configure({
+  API: {
+    GraphQL: {
+      endpoint:
+        "https://m27uptzxtzav7cooltu26qfdpa.appsync-api.us-east-1.amazonaws.com/graphql",
+      region: "us-east-1",
+      defaultAuthMode: "apiKey",
+      apiKey: "da2-x5h2lmi54jbnfk6znwohqweqou",
+    },
+  },
+});
 function Home() {
   const [soundList, setSoundList] = useState<any>(null);
   const [audio, setAudio] = useState<any>(null);
-  const [player1, setPlayer1] = useState<Tone.Player>(
-   // new Tone.Player().toDestination()
-  );
+  const [player1, setPlayer1] = useState<Tone.Player>();
+  // new Tone.Player().toDestination()
   //const dynamo = dbClient();
-  
 
   useEffect(() => {
     const load = async () => {
-     const res = await getList();
+      const res = await getList();
       setSoundList(res);
       console.log("res", res);
       setPlayer1(new Tone.Player().toDestination());
@@ -34,10 +43,35 @@ function Home() {
       // console.log("data", data);
     };
     load();
-    
-    
   }, []);
 
+  const createSampleEntry = async () => {
+    const client = await generateClient();
+    const result = await client.graphql({
+      query: createSample,
+      variables: {
+        input: {
+          name: `test-${Date.now()}`,
+          description: "test",
+          s3Path: "test",
+          reversed: false,
+          drum: "snare",
+          hygiene: "test",
+          sourceGen1: "organic",
+          genre: "test",
+          tags: ["test"],
+        },
+      },
+    });
+    console.log("saved to db", result);
+  };
+  const listAllSamples = async () => {
+    const client = await generateClient();
+    const result = await client.graphql({
+      query: listSamples ,
+    });
+    console.log("result", result.data.listSamples.items);
+  };
   const Start_Audio = async () => {
     if (Tone.context.state !== "running") {
       Tone.context.resume();
@@ -87,16 +121,16 @@ function Home() {
       <Button
         content="Click Me"
         className="w-1/2"
-        onClick={() => loadSound("9th Wonder Kit/hat1.wav")}
+        onClick={() => listAllSamples()}
       >
-        load
+        List Samples
       </Button>
       <Button
         content="Click Me"
         className="w-1/2"
-        onClick={() => previewSound(audio)}
+        onClick={() => createSampleEntry()}
       >
-        play
+        Create Sample Record
       </Button>
       {/* <input
      type='file'
@@ -104,17 +138,20 @@ function Home() {
      onChange={check}
      /> */}
 
-     {soundList && soundList.map((sound:any) => {
-        return <Button
-        key={sound}
-        className="w-1/2 text-lg text-white"
-        onClick={() => previewSound(sound)}
-       >
-          {sound}
-        </Button>
-     })}
+      {soundList &&
+        soundList.map((sound: any) => {
+          return (
+            <Button
+              key={sound}
+              className="w-1/2 text-lg text-white"
+              onClick={() => previewSound(sound)}
+            >
+              {sound}
+            </Button>
+          );
+        })}
     </main>
-  )
+  );
 }
-export default Home
+export default Home;
 //export default Home;
