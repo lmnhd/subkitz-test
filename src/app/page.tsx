@@ -80,7 +80,7 @@ function Home() {
       const sampleList: soundlistProps = await getList(drumType);
       setSoundList(sampleList);
       console.log("sampleList", sampleList);
-      const url = await getS3URL(sampleList.items[0].s3Path);
+      const url = await getS3URL(sampleList.items[0].s3Path) as string;
       setAudio(sampleList.items[0]);
       setPlayer1(new Tone.Player(url).toDestination());
       updateSub;
@@ -113,13 +113,13 @@ function Home() {
     }
   };
 
-  const loadSound = async (s3Path: string) => {
-    const url = await getS3URL(s3Path);
-    console.log("url", url);
-    const player = new Tone.Player(url).toDestination();
-    setPlayer1(player);
-    console.log("loaded", player);
-  };
+  // const loadSound = async (s3Path: string) => {
+  //   const url = await getS3URL(s3Path);
+  //   console.log("url", url);
+  //   const player = new Tone.Player(url,() => {}).toDestination();
+  //   setPlayer1(player);
+  //   console.log("loaded", player);
+  // };
   // const getSoundFile = async (s3Path: string) => {
   //   const blob: any = await downloadToMemory("");
   //   setAudio(blob);
@@ -157,7 +157,7 @@ function Home() {
         console.log("sample not found in S3");
         return;
       }
-      const url = await getS3URL(sample.s3Path);
+      const url = await getS3URL(sample.s3Path) as string;
 
       const sound = new Howl({
         src: url,
