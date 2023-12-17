@@ -14,7 +14,7 @@ import {
   getSampleByID,
   getSampleFromS3,
   updateSampleData,
-} from "@/lib/s3.ts";
+} from "@/lib/s3";
 
 import Image from "next/image";
 //import { dbClient } from "@/lib/dynamo";
