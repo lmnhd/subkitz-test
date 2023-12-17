@@ -1,3 +1,141 @@
+# schema {
+#     query: Query
+#     mutation: Mutation
+
+# }
+
+# type Query {
+#     getSample(id: ID!): Sample
+#     listSamples(limit: Int, nextToken: String): [Sample]
+#     listSamplesByGenre(genre: String!): [Sample]
+#     listSamplesByTag(tag: String!): [Sample]
+#     listSamplesByDrum(drum: String!): [Sample]
+#     listSamplesByHygiene(hygiene: String!): [Sample]
+#     listSamplesByLength(length: String!): [Sample]
+#     listSamplesByPitchRange(pitchRange: String!): [Sample]
+#     listSamplesByMix(mix: String!): [Sample]
+#     listSamplesByLoudness(loudness: String!): [Sample]
+#     listSamplesByDecadeStyle(decadeStyle: String!): [Sample]
+#     listSamplesBySourceGen1(sourceGen1: String!): [Sample]
+#     listSamplesBySourceGen2(sourceGen2: String!): [Sample]
+#     listSamplesByReversed(reversed: Boolean!): [Sample]
+#     listSamplesByInvalid(invalid: Boolean!): [Sample]
+#     listSamplesByOwner(owner: String!): [Sample]
+
+# }
+# type Mutation {
+#     createSample(input: CreateSampleInput!): Sample
+#     updateSample(input: UpdateSampleInput!): Sample
+#     deleteSample(input: DeleteSampleInput!): Sample
+# }
+
+type Sample @model @auth(rules: [{ allow: public }]) 
+{
+    id: ID!
+    name: String!
+    s3Path: String!
+    description: String
+    genre: String
+    tags: [String]
+    drum: String
+    hygiene: String
+    length: String
+    pitchRange: String
+    mix: String
+    loudness: String
+    decadeStyle: String
+    sourceGen1: String
+    sourceGen2: String
+    reversed: Boolean!
+    invalid: Boolean!
+    sampleLength: Int!
+    owner: String
+}
+
+input CreateSampleInput {
+    id: ID
+    name: String!
+    s3Path: String!
+    description: String
+    genre: String
+    tags: [String]
+    drum: String
+    hygiene: String
+    length: String
+    pitchRange: String
+    mix: String
+    loudness: String
+    decadeStyle: String
+    sourceGen1: String
+    sourceGen2: String
+    reversed: Boolean!
+    invalid: Boolean!
+    sampleLength: Int!
+    owner: String
+}
+
+input UpdateSampleInput {
+    id: ID!
+    name: String
+    s3Path: String
+    description: String
+    genre: String
+    tags: [String]
+    drum: String
+    hygiene: String
+    length: String
+    pitchRange: String
+    mix: String
+    loudness: String
+    decadeStyle: String
+    sourceGen1: String
+    sourceGen2: String
+    reversed: Boolean
+    invalid: Boolean
+    sampleLength: Int
+    owner: String
+}
+
+input DeleteSampleInput {
+    id: ID!
+}
+
+enum SampleStatus {
+    SUCCESS
+    PENDING
+    ERROR
+}
+
+type SampleIterator {
+    items: [Sample]
+    nextToken: String
+
+}
+
+enum ModelSortDirection {
+    ASC
+    DESC
+}
+enum ModelStringQueryOperatorInput {
+    eq
+    ne
+    le
+    lt
+    ge
+    gt
+    contains
+    notContains
+    between
+    beginsWith
+}
+
+
+
+
+
+
+
+
 # name: a.string(),
 #       s3Path: a.string(),
 #       description: a.string(),
@@ -60,24 +198,3 @@
 #       sourceGen1: a.enum(["analog", "digital"]), //analog, digital
 #       sourceGen2: a.enum(["organic", "synthetic"]), // organic, synthetic
 #       reversed: a.boolean().default(false),
-
-type Sample @model @auth(rules: [{ allow: public }]) 
-{
-    id: ID!
-    name: String!
-    s3Path: String!
-    description: String
-    genre: String
-    tags: [String]
-    drum: String
-    hygiene: String
-    length: String
-    pitchRange: String
-    mix: String
-    loudness: String
-    decadeStyle: String
-    sourceGen1: String
-    sourceGen2: String
-    reversed: Boolean!
-    owner: String
-}

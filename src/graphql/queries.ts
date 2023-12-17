@@ -26,6 +26,8 @@ export const getSample = /* GraphQL */ `query GetSample($id: ID!) {
     sourceGen1
     sourceGen2
     reversed
+    invalid
+    sampleLength
     owner
     createdAt
     updatedAt
@@ -56,6 +58,8 @@ export const listSamples = /* GraphQL */ `query ListSamples(
       sourceGen1
       sourceGen2
       reversed
+      invalid
+      sampleLength
       owner
       createdAt
       updatedAt

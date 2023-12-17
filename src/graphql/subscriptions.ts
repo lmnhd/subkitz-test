@@ -26,6 +26,8 @@ export const onCreateSample = /* GraphQL */ `subscription OnCreateSample($filter
     sourceGen1
     sourceGen2
     reversed
+    invalid
+    sampleLength
     owner
     createdAt
     updatedAt
@@ -54,6 +56,8 @@ export const onUpdateSample = /* GraphQL */ `subscription OnUpdateSample($filter
     sourceGen1
     sourceGen2
     reversed
+    invalid
+    sampleLength
     owner
     createdAt
     updatedAt
@@ -82,6 +86,8 @@ export const onDeleteSample = /* GraphQL */ `subscription OnDeleteSample($filter
     sourceGen1
     sourceGen2
     reversed
+    invalid
+    sampleLength
     owner
     createdAt
     updatedAt

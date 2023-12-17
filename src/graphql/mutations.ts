@@ -29,6 +29,8 @@ export const createSample = /* GraphQL */ `mutation CreateSample(
     sourceGen1
     sourceGen2
     reversed
+    invalid
+    sampleLength
     owner
     createdAt
     updatedAt
@@ -60,6 +62,8 @@ export const updateSample = /* GraphQL */ `mutation UpdateSample(
     sourceGen1
     sourceGen2
     reversed
+    invalid
+    sampleLength
     owner
     createdAt
     updatedAt
@@ -91,6 +95,8 @@ export const deleteSample = /* GraphQL */ `mutation DeleteSample(
     sourceGen1
     sourceGen2
     reversed
+    invalid
+    sampleLength
     owner
     createdAt
     updatedAt

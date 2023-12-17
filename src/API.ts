@@ -19,6 +19,8 @@ export type CreateSampleInput = {
   sourceGen1?: string | null,
   sourceGen2?: string | null,
   reversed: boolean,
+  invalid: boolean,
+  sampleLength: number,
   owner?: string | null,
 };
 
@@ -38,6 +40,8 @@ export type ModelSampleConditionInput = {
   sourceGen1?: ModelStringInput | null,
   sourceGen2?: ModelStringInput | null,
   reversed?: ModelBooleanInput | null,
+  invalid?: ModelBooleanInput | null,
+  sampleLength?: ModelIntInput | null,
   owner?: ModelStringInput | null,
   and?: Array< ModelSampleConditionInput | null > | null,
   or?: Array< ModelSampleConditionInput | null > | null,
@@ -91,6 +95,18 @@ export type ModelBooleanInput = {
   attributeType?: ModelAttributeTypes | null,
 };
 
+export type ModelIntInput = {
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+};
+
 export type Sample = {
   __typename: "Sample",
   id: string,
@@ -109,6 +125,8 @@ export type Sample = {
   sourceGen1?: string | null,
   sourceGen2?: string | null,
   reversed: boolean,
+  invalid: boolean,
+  sampleLength: number,
   owner?: string | null,
   createdAt: string,
   updatedAt: string,
@@ -131,6 +149,8 @@ export type UpdateSampleInput = {
   sourceGen1?: string | null,
   sourceGen2?: string | null,
   reversed?: boolean | null,
+  invalid?: boolean | null,
+  sampleLength?: number | null,
   owner?: string | null,
 };
 
@@ -155,6 +175,8 @@ export type ModelSampleFilterInput = {
   sourceGen1?: ModelStringInput | null,
   sourceGen2?: ModelStringInput | null,
   reversed?: ModelBooleanInput | null,
+  invalid?: ModelBooleanInput | null,
+  sampleLength?: ModelIntInput | null,
   owner?: ModelStringInput | null,
   and?: Array< ModelSampleFilterInput | null > | null,
   or?: Array< ModelSampleFilterInput | null > | null,
@@ -200,6 +222,8 @@ export type ModelSubscriptionSampleFilterInput = {
   sourceGen1?: ModelSubscriptionStringInput | null,
   sourceGen2?: ModelSubscriptionStringInput | null,
   reversed?: ModelSubscriptionBooleanInput | null,
+  invalid?: ModelSubscriptionBooleanInput | null,
+  sampleLength?: ModelSubscriptionIntInput | null,
   owner?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionSampleFilterInput | null > | null,
   or?: Array< ModelSubscriptionSampleFilterInput | null > | null,
@@ -240,6 +264,18 @@ export type ModelSubscriptionBooleanInput = {
   eq?: boolean | null,
 };
 
+export type ModelSubscriptionIntInput = {
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+  in?: Array< number | null > | null,
+  notIn?: Array< number | null > | null,
+};
+
 export type CreateSampleMutationVariables = {
   input: CreateSampleInput,
   condition?: ModelSampleConditionInput | null,
@@ -264,6 +300,8 @@ export type CreateSampleMutation = {
     sourceGen1?: string | null,
     sourceGen2?: string | null,
     reversed: boolean,
+    invalid: boolean,
+    sampleLength: number,
     owner?: string | null,
     createdAt: string,
     updatedAt: string,
@@ -294,6 +332,8 @@ export type UpdateSampleMutation = {
     sourceGen1?: string | null,
     sourceGen2?: string | null,
     reversed: boolean,
+    invalid: boolean,
+    sampleLength: number,
     owner?: string | null,
     createdAt: string,
     updatedAt: string,
@@ -324,6 +364,8 @@ export type DeleteSampleMutation = {
     sourceGen1?: string | null,
     sourceGen2?: string | null,
     reversed: boolean,
+    invalid: boolean,
+    sampleLength: number,
     owner?: string | null,
     createdAt: string,
     updatedAt: string,
@@ -353,6 +395,8 @@ export type GetSampleQuery = {
     sourceGen1?: string | null,
     sourceGen2?: string | null,
     reversed: boolean,
+    invalid: boolean,
+    sampleLength: number,
     owner?: string | null,
     createdAt: string,
     updatedAt: string,
@@ -386,6 +430,8 @@ export type ListSamplesQuery = {
       sourceGen1?: string | null,
       sourceGen2?: string | null,
       reversed: boolean,
+      invalid: boolean,
+      sampleLength: number,
       owner?: string | null,
       createdAt: string,
       updatedAt: string,
@@ -417,6 +463,8 @@ export type OnCreateSampleSubscription = {
     sourceGen1?: string | null,
     sourceGen2?: string | null,
     reversed: boolean,
+    invalid: boolean,
+    sampleLength: number,
     owner?: string | null,
     createdAt: string,
     updatedAt: string,
@@ -446,6 +494,8 @@ export type OnUpdateSampleSubscription = {
     sourceGen1?: string | null,
     sourceGen2?: string | null,
     reversed: boolean,
+    invalid: boolean,
+    sampleLength: number,
     owner?: string | null,
     createdAt: string,
     updatedAt: string,
@@ -475,6 +525,8 @@ export type OnDeleteSampleSubscription = {
     sourceGen1?: string | null,
     sourceGen2?: string | null,
     reversed: boolean,
+    invalid: boolean,
+    sampleLength: number,
     owner?: string | null,
     createdAt: string,
     updatedAt: string,
