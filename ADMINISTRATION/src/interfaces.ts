@@ -76,6 +76,68 @@ export enum Genre {
 
 }
 
+export enum DrumMachine {
+    // "01w-drums",
+    // "505-707-727",
+    // "Alesis-HR16b",
+    // "Boss-DR-110-DrRhythm",
+    // "bossdr55",
+    // "CasioSK-1",
+    // "CasioVL-1",
+    // "CR68-MSXKit",
+    // "cr78-ma101",
+    // "CrashCymbals",
+    // "D70Drums",
+    // "ddd1-kpr77",
+    // "Dr550",
+    // "Drumulator",
+    // "emu_sp12",
+    // "KAWAI-R-50e",
+    // "korgmini",
+    // "kpr77-ddm",
+    // "kr33",
+    // "Kr55b",
+    // "linn9000",
+    // "oberheim",
+    // "OberhiemDMX- LN2-TOM",
+    // "R8Drums",
+    // "Roland-Cr-78",
+    // "Roland-DR55-110-220",
+    // "RolandDR-550mkII",
+    tr808 = "tr808",
+    tr909 = "tr909",
+    tr707 = "tr707",
+    tr606 = "tr606",
+    tr505 = "tr505",
+    AlesisHR16b = "AlesisHR16b",
+    BossDR110DrRhythm = "BossDR110DrRhythm",
+    bossdr55 = "bossdr55",
+    CasioSK1 = "CasioSK1",
+    CasioVL1 = "CasioVL1",
+    CR68MSXKit = "CR68MSXKit",
+    cr78ma101 = "cr78ma101",
+    D70Drums = "D70Drums",
+    ddd1kpr77 = "ddd1kpr77",
+    Dr550 = "Dr550",
+    Drumulator = "Drumulator",
+    emu_sp12 = "emu_sp12",
+    KAWAIR50e = "KAWAIR50e",
+    korgmini = "korgmini",
+    kpr77ddm = "kpr77ddm",
+    kr33 = "kr33",
+    Kr55b = "Kr55b",
+    linn9000 = "linn9000",
+    oberheim = "oberheim",
+    OberhiemDMXLN2TOM = "OberhiemDMXLN2TOM",
+    R8Drums = "R8Drums",
+    RolandCr78 = "RolandCr78",
+    RolandDR55110220 = "RolandDR55110220",
+    RolandDR550mkII = "RolandDR550mkII",
+    // "RolandTR-505",
+    
+}
+    
+
 export enum Drum {
     sub = "sub",
     kick = "kick",
@@ -96,7 +158,9 @@ export enum Drum {
     clap = "clap",
     ride = "ride",
     rim = "rim",
-    nome = "nome"
+    nome = "nome",
+    loop = "loop",
+    sample = "sample"
 }
 export enum Hygiene {
     clean = "clean",
@@ -157,6 +221,7 @@ export type SampleType = {
     decadeStyle?: DecadeStyle,
     sourceGen1?: SourceGen1,
     sourceGen2?: SourceGen2,
+    drumMachine: DrumMachine,
     reversed?: boolean,
     owner?: string,
     
@@ -179,7 +244,8 @@ export interface Sample {
     decadeStyle?: DecadeStyle,
     sourceGen1?: SourceGen1,
     sourceGen2?: SourceGen2,
+    drumMachine?: DrumMachine,
     reversed?: boolean,
-    invalid?: boolean
+    invalid?: boolean,
     owner?: string,
 }

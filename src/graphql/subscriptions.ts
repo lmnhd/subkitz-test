@@ -25,6 +25,7 @@ export const onCreateSample = /* GraphQL */ `subscription OnCreateSample($filter
     decadeStyle
     sourceGen1
     sourceGen2
+    drumMachine
     reversed
     invalid
     sampleLength
@@ -55,6 +56,7 @@ export const onUpdateSample = /* GraphQL */ `subscription OnUpdateSample($filter
     decadeStyle
     sourceGen1
     sourceGen2
+    drumMachine
     reversed
     invalid
     sampleLength
@@ -85,6 +87,7 @@ export const onDeleteSample = /* GraphQL */ `subscription OnDeleteSample($filter
     decadeStyle
     sourceGen1
     sourceGen2
+    drumMachine
     reversed
     invalid
     sampleLength

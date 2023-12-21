@@ -25,6 +25,7 @@ export const getSample = /* GraphQL */ `query GetSample($id: ID!) {
     decadeStyle
     sourceGen1
     sourceGen2
+    drumMachine
     reversed
     invalid
     sampleLength
@@ -57,6 +58,7 @@ export const listSamples = /* GraphQL */ `query ListSamples(
       decadeStyle
       sourceGen1
       sourceGen2
+      drumMachine
       reversed
       invalid
       sampleLength

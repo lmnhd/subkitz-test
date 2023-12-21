@@ -28,6 +28,7 @@ export const createSample = /* GraphQL */ `mutation CreateSample(
     decadeStyle
     sourceGen1
     sourceGen2
+    drumMachine
     reversed
     invalid
     sampleLength
@@ -61,6 +62,7 @@ export const updateSample = /* GraphQL */ `mutation UpdateSample(
     decadeStyle
     sourceGen1
     sourceGen2
+    drumMachine
     reversed
     invalid
     sampleLength
@@ -94,6 +96,7 @@ export const deleteSample = /* GraphQL */ `mutation DeleteSample(
     decadeStyle
     sourceGen1
     sourceGen2
+    drumMachine
     reversed
     invalid
     sampleLength

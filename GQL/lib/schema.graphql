@@ -46,6 +46,7 @@ type Sample @model @auth(rules: [{ allow: public }])
     decadeStyle: String
     sourceGen1: String
     sourceGen2: String
+    drumMachine: String
     reversed: Boolean!
     invalid: Boolean!
     sampleLength: Int!
@@ -68,6 +69,7 @@ input CreateSampleInput {
     decadeStyle: String
     sourceGen1: String
     sourceGen2: String
+    drumMachine: String
     reversed: Boolean!
     invalid: Boolean!
     sampleLength: Int!
@@ -90,6 +92,7 @@ input UpdateSampleInput {
     decadeStyle: String
     sourceGen1: String
     sourceGen2: String
+    drumMachine: String
     reversed: Boolean
     invalid: Boolean
     sampleLength: Int
