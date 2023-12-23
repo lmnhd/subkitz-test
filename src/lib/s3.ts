@@ -16,6 +16,38 @@ import * as SampleTypes from "../../ADMINISTRATION/src/interfaces";
 import { ListSamplesQueryVariables, Sample } from "@/API";
 import fs from "fs";
 import { SoundListProps } from "@/app/page";
+import { STSClient } from "@aws-sdk/client-sts";
+// Set the AWS Region.
+const REGION = "us-east-1";
+// Create an AWS STS service client object.
+export const sts = new STSClient({ region: REGION });
+
+import { AssumeRoleCommand } from "@aws-sdk/client-sts";
+
+import { client } from "../libs/client.js";
+
+export const assumeRole = async () => {
+  try {
+    // Returns a set of temporary security credentials that you can use to
+    // access Amazon Web Services resources that you might not normally
+    // have access to.
+    const command = new AssumeRoleCommand({
+      // The Amazon Resource Name (ARN) of the role to assume.
+      RoleArn: "arn:aws:iam::622703699030:role/Amplify-Backend-Deployment",
+      // An identifier for the assumed role session.
+      RoleSessionName: "session1",
+      // The duration, in seconds, of the role session. The value specified
+      // can range from 900 seconds (15 minutes) up to the maximum session
+      // duration set for the role.
+      DurationSeconds: 900,
+    });
+    const response = await sts.send(command);
+    console.log(response);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
 
 Amplify.configure({
@@ -50,11 +82,13 @@ Amplify.configure({
 const client = generateClient();
 const dynamo = new DynamoDBClient({
   region: "us-east-1",
-  // credentials:{
-  //   accessKeyId: "",
-  //   secretAccessKey:""
-  // }
-  // , endpoint: ""
+  credentials:{
+    accessKeyId: "",
+    secretAccessKey:"",
+
+  }
+  , endpoint: "",
+
 });
 const docClient = DynamoDBDocumentClient.from(dynamo);
 
@@ -188,7 +222,8 @@ export const getListFromDynamo = async () => {
   const command = new ScanCommand({
     TableName: TABLE_NAME,
     Select: "ALL_ATTRIBUTES",
-   Limit: 1000
+   Limit: 1000,
+
   });
 
   const results = await dynamo.send(command);

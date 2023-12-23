@@ -51,6 +51,7 @@ Amplify.configure({
       defaultAuthMode: "apiKey",
       apiKey: "da2-x5h2lmi54jbnfk6znwohqweqou",
     },
+    
   },
   Storage: {
     S3: {
@@ -59,6 +60,7 @@ Amplify.configure({
       //dangerouslyConnectToHttpEndpointForTesting: 'true',
     },
   },
+
 });
 
 export type SoundListProps = {
