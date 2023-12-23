@@ -17,14 +17,13 @@ import { ListSamplesQueryVariables, Sample } from "@/API";
 import fs from "fs";
 import { SoundListProps } from "@/app/page";
 import { STSClient } from "@aws-sdk/client-sts";
+import { AssumeRoleCommand } from "@aws-sdk/client-sts";
 // Set the AWS Region.
 const REGION = "us-east-1";
 // Create an AWS STS service client object.
-export const sts = new STSClient({ region: REGION });
+const sts = new STSClient({ region: REGION });
 
-import { AssumeRoleCommand } from "@aws-sdk/client-sts";
 
-import { client } from "../libs/client.js";
 
 export const assumeRole = async () => {
   try {
@@ -47,7 +46,7 @@ export const assumeRole = async () => {
     console.error(err);
   }
 };
-
+assumeRole();
 
 
 Amplify.configure({
