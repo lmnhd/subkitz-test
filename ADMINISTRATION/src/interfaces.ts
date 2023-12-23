@@ -155,6 +155,8 @@ export enum Drum {
     whistle = "whistle",
     femvox = "femvox",
     malevox = "malevox",
+    tam = "tam",
+    fx = "fx",
     clap = "clap",
     ride = "ride",
     rim = "rim",

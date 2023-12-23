@@ -13,6 +13,12 @@ import {
   getSampleFromS3,
   updateSampleData,
   getUnCategorizedList,
+  getSampleByIDWithDynamo,
+  getListFromDynamo,
+  getListFromDynamoByDrumValue,
+  dynamoQueryScanProps,
+  SetSamplesCache,
+  GetSamplesCache,
 } from "@/lib/s3";
 
 import Image from "next/image";
@@ -26,10 +32,7 @@ import * as SampleTypes from "../../ADMINISTRATION/src/interfaces";
 import SampleProperties from "@/components/sampleitem/sampleproperties";
 import { get } from "http";
 import DrumSelect from "@/components/drumselect";
-export type soundlistProps = {
-  items: Sample[];
-  drumType?: SampleTypes.Drum | undefined;
-};
+
 Amplify.configure({
   Auth: {
     Cognito: {
@@ -57,18 +60,26 @@ Amplify.configure({
     },
   },
 });
+
+export type SoundListProps = {
+  items: Sample[];
+  drumType?: SampleTypes.Drum | undefined;
+};
 function Home() {
-  const [soundList, setSoundList] = useState<soundlistProps>({
+  const [soundList, setSoundList] = useState<SoundListProps>({
     items: [],
     drumType: undefined,
   });
-  const [currentSoundListIndex, setCurrentSoundListIndex] = useState<number>(0);
+  const [currentSoundID, setCurrentSoundID] = useState<string>();
+  const [currentSoundIndex, setCurrentSoundIndex] = useState<number>(-1);
   const [audio, setAudio] = useState<Sample>();
   const [player1, setPlayer1] = useState<Tone.Player>();
-  const [drumType, setDrumType] = useState<SampleTypes.Drum>(
-    SampleTypes.Drum.kick
-  );
-  const [badFileArray, setBadFileArray] = useState<{sample:Sample,indexInList:number}[]>();
+  const [drumType, setDrumType] = useState<string>("any");
+  const [badFileArray, setBadFileArray] =
+    useState<{ sample: Sample; indexInList: number }[]>();
+  const [listLength, setListLength] = useState<number>(50);
+  const listLengthOptions = [10, 20, 50, 100, 200];
+
   // new Tone.Player().toDestination()
   //const dynamo = dbClient();
 
@@ -76,13 +87,24 @@ function Home() {
 
   useEffect(() => {
     const load = async () => {
-      const sampleList: soundlistProps = await getUnCategorizedList(1000);
-      setSoundList(sampleList);
-      console.log("sampleList", sampleList);
+      // const sampleList: SoundListProps = await getUnCategorizedList(50);
+      const props: dynamoQueryScanProps = {
+        drumType: SampleTypes.Drum.kick,
+        //limit: 50,
+      };
 
+      const sampleList: SoundListProps = await getListFromDynamo();
+
+      setSoundList(sampleList);
+      // SetSamplesCache(sampleList.items);
+
+      console.log("sampleList", sampleList);
+      if (sampleList.items.length === 0) {
+        return;
+      }
       const url = (await getS3URL(sampleList.items[0].s3Path)) as string;
-      setAudio(sampleList.items[0]);
-      setPlayer1(new Tone.Player(url).toDestination());
+      //setAudio(sampleList.items[0]);
+      //setPlayer1(new Tone.Player(url).toDestination());
 
       //updateSub;
       // const data = dynamo
@@ -90,12 +112,15 @@ function Home() {
     };
     load();
   }, []);
-  const changeDrumList = async (drum: SampleTypes.Drum) => {
-    const sampleList: soundlistProps = await getList(drum);
-    setSoundList(sampleList);
+
+  //console.log("SamplesCache => ", GetSamplesCache())
+
+  const changeDrumList = async (drum: any) => {
+    // const sampleList: SoundListProps = await getList(drum);
+    // setSoundList(sampleList);
     setDrumType(drum);
-    setAudio(sampleList.items[0]);
-    console.log("sampleList", sampleList);
+    //setAudio(sampleList.items[0]);
+    //console.log("sampleList", sampleList);
   };
   // const updateSub = client
   //   .graphql({
@@ -136,7 +161,7 @@ function Home() {
     console.log("list", list);
   };
 
-  const addSampleToBadArray = async (sample: Sample,sampleIndex:number) => {
+  const addSampleToBadArray = async (sample: Sample, sampleIndex: number) => {
     //check if sample is already in badFileArray
     const check = badFileArray?.find((item) => item.sample.id === sample.id);
     if (check) {
@@ -144,12 +169,10 @@ function Home() {
       return;
     }
     const tempList = badFileArray ? [...badFileArray] : [];
-    setBadFileArray([...tempList, {sample, indexInList: sampleIndex }]);
+    setBadFileArray([...tempList, { sample, indexInList: sampleIndex }]);
     console.log(tempList);
   };
-  const removeBadSamplesFromList = async (
-    badSamples = badFileArray
-  ) => {
+  const removeBadSamplesFromList = async (badSamples = badFileArray) => {
     if (!badFileArray || badFileArray!.length === 0) {
       return;
     }
@@ -182,7 +205,7 @@ function Home() {
     console.log("newList", newList);
   };
 
-  const previewSound = async (sample: Sample, sampleIndex: number) => {
+  const previewSound = async (sampleID: string) => {
     //const sound:any = await getSoundFile("");
     // if (badFileArray.length > 0) {
     //   console.log(`found ${badFileArray.length} bad files`);
@@ -197,26 +220,39 @@ function Home() {
     //   }
     // }
     Start_Audio();
+    const sample = soundList.items.find((sound) => {
+      return sound.id === sampleID;
+    });
+    const sampleIndex = soundList.items.findIndex((sound) => {
+      return sound.id === sampleID;
+    });
+    setCurrentSoundIndex(sampleIndex);
 
-    if (sampleIndex !== currentSoundListIndex) {
-      console.log(sample.s3Path);
-      const check = await getSampleFromS3(sample.s3Path);
+    if (sampleID !== currentSoundID) {
+      console.log(sample?.s3Path);
+      // const check = await getSampleFromS3(sample.s3Path);
 
-      if (check.length === 0) {
-        console.log("sample not found in S3");
-        return;
-      }
+      // if (check.length === 0) {
+      //   console.log("sample not found in S3");
+      //   addSampleToBadArray(sample, sampleIndex);
+      //   return;
+      // }
 
-      const url = (await getS3URL(sample.s3Path)) as string;
+      const url = (await getS3URL(sample!.s3Path)) as string;
 
-      console.log("trying to play...", sample.id, sample.name, sample.s3Path);
+      console.log(
+        "trying to play...",
+        sample?.id,
+        sample?.name,
+        sample!.s3Path
+      );
 
       console.log("url", url);
 
       try {
         let timeOut = setTimeout(async () => {
           console.log("timeout");
-          addSampleToBadArray(sample,sampleIndex);
+          addSampleToBadArray(sample!, sampleIndex);
           clearTimeout(timeOut);
         }, 5000);
         const player = new Tone.Player(url, () => {
@@ -232,11 +268,16 @@ function Home() {
       const sound = new Howl({
         src: url,
       });
-
+      // const sampleWithAllFields = (await getSampleByIDWithDynamo(sample.id)) as Sample;
       setAudio(sample);
-      setCurrentSoundListIndex(sampleIndex);
+      console.log("sample", sample);
+      // const newSoundList = soundList;
+      // newSoundList.items.splice(sampleIndex, 1, sample);
+      // setSoundList(newSoundList);
+      setCurrentSoundID(sampleID);
       sound.play();
-      console.log("sampledrum is ", sample.drum);
+      console.log("sample drum is ", sample!.drum);
+      console.log("sampleWithFields check...", sample?.sourceGen1);
     } else {
       if (player1?.loaded) {
         samplePlayCurrentSound();
@@ -245,37 +286,23 @@ function Home() {
   };
 
   const samplePlayCurrentSound = async () => {
-    //  const url = "http://localhost:3000/Dj_Premier_kick_04.wav"
-    //  console.log("url", url);
-    // const player = new Tone.Player(url, () => {
-    //   console.log("loaded!!");
-    //   player.start();
-
-    // }).toDestination()
-
-    //  console.log("url", url);
-    //   let player = new Howl({
-    //     src: url,
-    //   });
-    //   player.play();
-
-    //return;
-
-    console.log(`now playing ${audio?.name} - ${audio?.id}`);
-    Start_Audio();
     if (player1) {
+      // console.log(`now playing `, audio);
+      // Start_Audio();
       try {
         player1.start();
       } catch (error) {
         console.log("buffer is either not set or not loaded");
       }
+    } else {
+      previewSound(currentSoundID!);
     }
   };
 
-  const updateSampleEntry = async (value: string, prop: string) => {
-    console.log("updateSampleEntry", value, prop);
+  const updateSampleEntry = async (value: string, prop: string, id: string) => {
+    console.log("updateSampleEntry", value, prop, id);
     if (audio) {
-      const sample = soundList.items[currentSoundListIndex];
+      const sample = soundList.items.find((item) => item.id === id);
       if (!sample) {
         return;
       }
@@ -285,30 +312,54 @@ function Home() {
       //return;
 
       let newList = soundList;
-      newList.items.splice(currentSoundListIndex, 1, update);
+      newList.items.splice(currentSoundIndex, 1, update);
       setSoundList(newList);
       setAudio(update);
       //console.log("updated sample => ", update);
-      //console.log("sample in list => ", soundList.items[currentSoundListIndex]);
+      //console.log("sample in list => ", soundList.items[currentSoundID]);
 
       const updatedSampleID = await updateSampleData(update);
       console.log("updatedSampleID", updatedSampleID);
 
       await new Promise((resolve) => setTimeout(resolve, 5000));
-      const check = await getSampleByID(updatedSampleID);
+      const check = await getSampleByIDWithDynamo(updatedSampleID);
       console.log("check => ", check);
     }
   };
   // if(window){
-  //   window.addEventListener("keydown", (e) => {
-  //     e.preventDefault();
-  //     if (e.key === " ") {
-  //       console.log(`badFileArray = `, badFileArray);
-  //     }
-  //   });
-  // }
- 
-
+  // window.addEventListener("keydown", (e) => {
+  //   e.preventDefault();
+  //   if (e.key === " ") {
+  //     console.log(`AUDIO = `, audio);
+  //   }
+  // });
+  //}
+  const colorArray = [
+    "bg-gradient-to-br from-violet-900 via-purple-950 to-violet-800",
+    "bg-gradient-to-br from-red-900 via-fuchsia-800 to-red-800",
+    "bg-gradient-to-br from-yellow-900 via-amber-800 to-yellow-800",
+    "bg-gradient-to-br from-green-900 via-lime-800 to-green-800",
+    "bg-gradient-to-br from-blue-900 via-cyan-800 to-blue-800",
+    "bg-gradient-to-br from-indigo-900 via-blue-800 to-indigo-800",
+    "bg-gradient-to-br from-pink-900 via-rose-800 to-pink-800",
+    "bg-gradient-to-br from-gray-900 via-slate-800 to-gray-800",
+    "bg-gradient-to-br from-slate-900 via-gray-800 to-slate-800",
+    "bg-gradient-to-br from-violet-900 via-purple-950 to-violet-800",
+    "bg-gradient-to-br from-red-900 via-fuchsia-800 to-red-800",
+    "bg-gradient-to-br from-yellow-900 via-amber-800 to-yellow-800",
+    "bg-gradient-to-br from-green-900 via-lime-800 to-green-800",
+    "bg-gradient-to-br from-blue-900 via-cyan-800 to-blue-800",
+    "bg-gradient-to-br from-indigo-900 via-blue-800 to-indigo-800",
+    "bg-gradient-to-br from-pink-900 via-rose-800 to-pink-800",
+    "bg-gradient-to-br from-gray-900 via-slate-800 to-gray-800",
+    "bg-gradient-to-br from-slate-900 via-gray-800 to-slate-800",
+    "bg-gradient-to-br from-violet-900 via-purple-950 to-violet-800",
+  ]
+  const getDrumColor = (drum: string) => {
+    const drumArray = Object.keys(SampleTypes.Drum);
+    const index = drumArray.findIndex((item) => item === drum);
+    return colorArray[index];
+  }
   return (
     <main className="flex min-h-screen flex-col items-center justify-between py-8">
       <h1 className="text-4xl font-bold text-center text-amber-500">
@@ -317,31 +368,55 @@ function Home() {
       <p className="w-2/3 ml-auto mr-10 text-right">
         rhythm composition repository by lmnhd
       </p>
-      <div className="flex gap-4 justify-center items-center my-6">
-        <DrumSelect updateValue={changeDrumList} defaultDrum={drumType} />
-        <Button
-          content="Click Me"
-          className="w-28 h-28 text-center text-lg bg-gradient-to-br from-violet-900 via-purple-950 to-violet-500 text-lime-300 hover:from-red-900 hover:via-fuchsia-800 hover:to-red-500"
-          onClick={() => samplePlayCurrentSound()}
-        >
-          {`${audio?.name}`}
-        </Button>
-      </div>
-      <div className="m-8 border-[1px] border-lime-300 p-5 rounded-sm">
-        <SampleProperties sample={audio!} updateValue={updateSampleEntry} />
+      <div className="flex flex-wrap gap-2 justify-around items-center my-6">
+        <div className="flex flex-col justify-center text-center items-center w-48">
+          <p className="text-md text-amber-600 w-48">Select Drum Type</p>
+          <DrumSelect updateValue={changeDrumList} defaultDrum={drumType} />
+
+          <p className="text-md text-amber-300 w-48">limit</p>
+          <select
+            name="listLength"
+            id="listLength"
+            title="listLength"
+            value={listLength}
+            onChange={(e) => setListLength(Number(e.target.value))}
+            className="text-slate-600 bg-lime-400 w-28 h-6 text-center "
+          >
+            {listLengthOptions.map((num) => {
+              return <option key={num}>{num}</option>;
+            })}
+          </select>
+        </div>
+        <div className="w-1/2 border-[1px] border-lime-900 p-1 rounded-sm">
+          <SampleProperties sample={audio!} updateValue={updateSampleEntry} />
+        </div>
+        <div>
+          <Button
+            content="Click Me"
+            className="w-28 h-28 text-center rounded-2xl text-sm p-1 bg-gradient-to-br from-violet-900 via-purple-950 to-violet-500 text-lime-300 hover:from-red-900 hover:via-fuchsia-800 hover:to-red-500"
+            onClick={() => samplePlayCurrentSound()}
+          >
+            {`${audio?.name.trim().split(".")[0].substring(0, 7)}...`} <br/>
+            {currentSoundIndex !== -1 &&  currentSoundIndex + 1}
+          </Button>
+        </div>
       </div>
 
       {badFileArray && badFileArray!.length > 0 && (
-        
         <div className="bg-slate-100 pb-1  h-24  overflow-y-auto relative">
           <p className="text-lg text-center font-bold text-slate-300 z-10 sticky top-0 bg-slate-800 ">
-          {badFileArray!.length} Bad Samples!</p>
+            {badFileArray!.length} Bad Samples!
+          </p>
           <div className="bg-slate-800 ">
-           
             {badFileArray!.map((sample) => {
               return (
-                <div key={sample.indexInList} className="flex flex-col text-sm text-red-600 border-[1px] border-violet-400 p-2 text-center rounded-lg">
-                  <p className="text-lg">{`Drum Pad ${sample.indexInList + 1}`}</p>
+                <div
+                  key={sample.indexInList}
+                  className="flex flex-col text-sm text-red-600 border-[1px] border-violet-400 p-2 text-center rounded-lg"
+                >
+                  <p className="text-lg">{`Drum Pad ${
+                    sample.indexInList + 1
+                  }`}</p>
                   <p>{sample.sample.name}</p>
                   <p>{sample.sample.id}</p>
                   <p>{sample.sample.drum}</p>
@@ -351,50 +426,45 @@ function Home() {
             })}
           </div>
           <button
-          title="remove bad samples from list"
-          onClick={() => updateInvalidSamples()}
-          className="absolute bottom-0 right-0 bg-gradient-to-br from-red-900 via-fuchsia-800 to-red-500 text-lime-300 hover:from-red-900 hover:via-fuchsia-800 hover:to-red-500"
-          >Remove</button>
+            title="remove bad samples from list"
+            onClick={() => updateInvalidSamples()}
+            className="absolute bottom-0 right-0 bg-gradient-to-br from-red-900 via-fuchsia-800 to-red-500 text-lime-300 hover:from-red-900 hover:via-fuchsia-800 hover:to-red-500"
+          >
+            Remove
+          </button>
         </div>
       )}
-
-      {/* <Button
-        content="Click Me"
-        className="w-1/2"
-        onClick={() => createSampleEntry()}
-      >
-        Create Sample Record
-      </Button> */}
-      {/* <input
-     type='file'
-    
-     onChange={check}
-     /> */}
 
       <h1 className="text-4xl font-bold">{soundList.drumType}</h1>
       <div className="flex flex-wrap gap-1 h-96 overflow-auto items-center justify-between  text-sm">
         {soundList &&
-          soundList.items.map((sound: Sample, index: number) => {
-            return (
-              <div
-                key={sound.id}
-                className="p-1 flex items-center justify-center"
-              >
-                <Button
+          soundList.items
+            .filter((sound) => {
+              if (drumType === "any") return true;
+              return sound.drum === drumType;
+            })
+            .slice(0, listLength)
+            .map((sound: Sample, index: number) => {
+              return (
+                <div
                   key={sound.id}
-                  className={`text-lime-400 w-32 font-extralight hover:text-pink-500 hover:bg-gradient-to-bl hover:from-slate-900  hover:to-gray-800 ${
-                    currentSoundListIndex === index
-                      ? "bg-gradient-to-bl from-red-900 to-purple-800"
-                      : ""
-                  }`}
-                  onClick={() => previewSound(sound, index)}
+                  className="p-1 flex items-center justify-center"
                 >
-                  {`${soundList.drumType} ${index + 1}`}
-                  {/* {sound.name.split(".")[0]} */}
-                </Button>
-              </div>
-            );
-          })}
+                  <Button
+                    key={sound.id}
+                    className={`text-lime-400 w-28 h-20 text-sm text- font-extralight hover:text-pink-500 hover:bg-gradient-to-bl hover:from-slate-900  hover:to-gray-800 ${
+                      currentSoundID === sound.id
+                        ? "bg-gradient-to-bl border-spacing-2 border-2  border-red-600 text-xl from-lime-500 to-lime-600 font-bold text-violet-500"
+                        : getDrumColor(sound.drum!)
+                    }`}
+                    onClick={() => previewSound(sound.id)}
+                  >
+                    {`${sound.drum ? sound.drum : "sound"} ${index + 1}`}
+                    {/* {sound.name.split(".")[0]} */}
+                  </Button>
+                </div>
+              );
+            })}
       </div>
     </main>
   );

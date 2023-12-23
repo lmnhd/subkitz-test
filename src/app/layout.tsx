@@ -50,7 +50,7 @@ function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={dhurjati.className}>{children}</body>
+      <body className={`bg-gradient-to-b from-slate-950 to-slate-800 ${dhurjati.className}`}>{children}</body>
     </html>
   )
 }

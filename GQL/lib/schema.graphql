@@ -48,6 +48,9 @@ type Sample @model @auth(rules: [{ allow: public }])
     sourceGen2: String
     drumMachine: String
     reversed: Boolean!
+    loop: Boolean!
+    looptype: String #beat, music
+    tonal: Boolean!
     invalid: Boolean!
     sampleLength: Int!
     owner: String
@@ -71,6 +74,9 @@ input CreateSampleInput {
     sourceGen2: String
     drumMachine: String
     reversed: Boolean!
+    loop: Boolean!
+    looptype: String #beat, music
+    tonal: Boolean!
     invalid: Boolean!
     sampleLength: Int!
     owner: String
@@ -94,6 +100,9 @@ input UpdateSampleInput {
     sourceGen2: String
     drumMachine: String
     reversed: Boolean
+    loop: Boolean
+    looptype: String #beat, music
+    tonal: Boolean
     invalid: Boolean
     sampleLength: Int
     owner: String

@@ -13,9 +13,10 @@ import {
   ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
 import * as SampleTypes from "../../ADMINISTRATION/src/interfaces";
-import { Sample } from "@/API";
+import { ListSamplesQueryVariables, Sample } from "@/API";
 import fs from "fs";
-import { soundlistProps } from "@/app/page";
+import { SoundListProps } from "@/app/page";
+
 
 Amplify.configure({
   Auth: {
@@ -29,8 +30,9 @@ Amplify.configure({
   },
   API: {
     GraphQL: {
-      endpoint:
-        "https://m27uptzxtzav7cooltu26qfdpa.appsync-api.us-east-1.amazonaws.com/graphql",
+       endpoint:
+         "https://m27uptzxtzav7cooltu26qfdpa.appsync-api.us-east-1.amazonaws.com/graphql",
+      //endpoint: "wss://m27uptzxtzav7cooltu26qfdpa.appsync-realtime-api.us-east-1.amazonaws.com/graphql",
       region: "us-east-1",
       defaultAuthMode: "apiKey",
       apiKey: "da2-x5h2lmi54jbnfk6znwohqweqou",
@@ -55,6 +57,16 @@ const dynamo = new DynamoDBClient({
   // , endpoint: ""
 });
 const docClient = DynamoDBDocumentClient.from(dynamo);
+
+const TABLE_NAME = "Sample-iv37v7a55nd6tknm6gbqwfzcym-NONE";
+
+let SamplesCache:Sample[] = []
+export const SetSamplesCache = (samples:Sample[]) => {
+  SamplesCache = samples;
+}
+export const GetSamplesCache = () => {
+  return SamplesCache;
+}
 export const listSamplesS3FolderContents = async (folderPath: string) => {
   const result = await list({
     prefix: folderPath, //"Base/Classic Kits/",
@@ -84,38 +96,201 @@ export const getSampleFromS3 = async (s3Path: string) => {
     return item.key;
   });
 };
-export const getUnCategorizedList = async (
-  limit: number = 100
-) => {
-  
+export const getUnCategorizedList = async (limit: number = 10) => {
+  const variables: ListSamplesQueryVariables = {};
   // Find all samples that have no drum attribute
   const results = await client.graphql({
-      query: listSamples,
+    query: listSamples,
 
-      variables: {
-          limit:limit ,
-          filter: {
-              drum: {
-                  attributeExists: false
-              },
-              invalid:{
-                eq: false
-              }
-          }
+    variables: {
+      limit: 300,
+
+      filter: {
+        drum: {
+          attributeExists: false,
+          //eq: "snare",
+          
+        },
+        invalid: {
+          eq: false,
+          //attributeExists:true
+        },
+        // drumMachine:{
+        //   eq: "tr808"
+        // }
       },
-      authMode: "apiKey",
+    },
+    authMode: "apiKey",
+  });
+  console.log(results.data.listSamples?.items.length);
 
-  })
+  const filteredList = results.data.listSamples?.items?.filter((item) => {
+    
+    // if(item?.drum?.includes("kick") || item?.drum?.includes("snare") || item?.drum?.includes("hat") || item?.drum?.includes("cymbal") || item?.drum?.includes("tom") || item?.drum?.includes("perc") || item?.drum?.includes("sam") || item?.drum?.includes("loop") || item?.drum?.includes("cl") || item?.drum?.includes("sub") || item?.drum?.includes("vox") || item?.drum?.includes("instrument")){
+    //   console.log("null?", item)
+    //   return false
+    //   //return item
+    // }else{return true}
+    return true
+  }).splice(0, limit);
+  return {
+    items: filteredList,
+    drumType: SampleTypes.Drum.sample,
+  };
+};
+
+export const getModifiedSamplesList = async (limit: number = 100) => {
+  const variables: ListSamplesQueryVariables = {};
+  // Find all samples that have no drum attribute
+  const results = await client.graphql({
+    query: listSamples,
+
+    variables: {
+      limit: limit,
+
+      filter: {
+        sourceGen1: {
+          attributeExists: true,
+        },
+      },
+    },
+    authMode: "apiKey",
+  });
   console.log(results.data.listSamples?.items);
-  return { items: results.data.listSamples?.items, drumType: SampleTypes.Drum.kick };
+  return {
+    items: results.data.listSamples?.items,
+    drumType: SampleTypes.Drum.kick,
+  };
+};
+
+
+export type dynamoQueryScanProps = {
+  drumType?: SampleTypes.Drum;
+  limit?: number;
+  hygiene?: SampleTypes.Hygiene;
+  decadeStyle?: SampleTypes.DecadeStyle;
+  sourceGen1?: SampleTypes.SourceGen1;
+  sourceGen2?: SampleTypes.SourceGen2;
+  reversed?: boolean;
+  invalid?: boolean;
+  owner?: string;
+  genre?: SampleTypes.Genre;
+  tags?: [];
+  pitchRange?: SampleTypes.PitchRange;
+  mix?: SampleTypes.Mix;
+  loudness?: SampleTypes.Loudness;
+  length?: SampleTypes.Length;
+  drumMachine?: SampleTypes.DrumMachine;
+  name?: string
+}
+export const getListFromDynamo = async () => {
+
+  const command = new ScanCommand({
+    TableName: TABLE_NAME,
+    Select: "ALL_ATTRIBUTES",
+   Limit: 1000
+  });
+
+  const results = await dynamo.send(command);
+
+  console.log(`results = ${results.Count}`);
+
+  return {
+    items: results.Items as Sample[]
+  } as SoundListProps;
+  
+};
+
+export const getListFromDynamoByNullValue = async (
+ fieldToCheck: string
+) => {
+  const command = new ScanCommand({
+    //filter expression where drum not exists
+    TableName: TABLE_NAME,
+    FilterExpression: "attribute_not_exists(#field)",
+    
+    // ExpressionAttributeValues: {
+    //   ":drum": drumType,
+    //   //":drumMachine": SampleTypes.DrumMachine.tr808,
+    // },
+    ExpressionAttributeNames: {
+      "#field": fieldToCheck,
+      //"#drumMachine": "drumMachine",
+      // "#name": "name",
+      // "#id": "id",
+      // "#description": "description",
+    },
+    // ProjectionExpression: "#id, #name, #description, #drum",
+    // AttributesToGet: ["id", "name", "description", "drum"],
+
+    Select: "ALL_ATTRIBUTES",
+    
+
+    //Limit: limit,
+  });
+  const results = await dynamo.send(command);
+  console.log(`results = ${results.Count}`);
+  // const props:SoundListProps = {items:[], drumType:drumType};
+  return {
+    items: results.Items as Sample[],
+    drumType: SampleTypes.Drum.sample,
+  } as SoundListProps;
+  
+};
+export const getListFromDynamoByDrumValue = async (
+ props: dynamoQueryScanProps
+) => {
+  const command = new ScanCommand({
+    
+    TableName: TABLE_NAME,
+    FilterExpression: "#drum = :drum",
+    
+    ExpressionAttributeValues: {
+      ":drum": props.drumType,
+      //":drumMachine": SampleTypes.DrumMachine.tr808,
+    },
+    ExpressionAttributeNames: {
+      "#drum": "drum",
+      
+    },
+   
+
+    Select: "ALL_ATTRIBUTES",
+    
+
+    Limit: props.limit,
+  });
+  const results = await dynamo.send(command);
+  console.log(`results = ${results.Count}`);
+  // const props:SoundListProps = {items:[], drumType:drumType};
+  return {
+    items: results.Items as Sample[],
+    drumType: props.drumType,
+  } as SoundListProps;
+  
 };
 export const getList = async (
   drumType: SampleTypes.Drum = SampleTypes.Drum.kick,
-  limit: number = 100, hygiene?: SampleTypes.Hygiene, decadeStyle?: SampleTypes.DecadeStyle, sourceGen1?: SampleTypes.SourceGen1, sourceGen2?: SampleTypes.SourceGen2, reversed?: boolean, invalid?: boolean, owner?: string, genre?: SampleTypes.Genre, tags?: SampleTypes.Tag[], pitchRange?: SampleTypes.PitchRange, mix?: SampleTypes.Mix, loudness?: SampleTypes.Loudness, length?: SampleTypes.Length, drumMachine?: SampleTypes.DrumMachine, name?: string
+  limit: number = 100,
+  hygiene?: SampleTypes.Hygiene,
+  decadeStyle?: SampleTypes.DecadeStyle,
+  sourceGen1?: SampleTypes.SourceGen1,
+  sourceGen2?: SampleTypes.SourceGen2,
+  reversed?: boolean,
+  invalid?: boolean,
+  owner?: string,
+  genre?: SampleTypes.Genre,
+  tags?: SampleTypes.Tag[],
+  pitchRange?: SampleTypes.PitchRange,
+  mix?: SampleTypes.Mix,
+  loudness?: SampleTypes.Loudness,
+  length?: SampleTypes.Length,
+  drumMachine?: SampleTypes.DrumMachine,
+  name?: string
 ) => {
   const command = new ScanCommand({
-    TableName: "Sample-iv37v7a55nd6tknm6gbqwfzcym-NONE",
-      FilterExpression: "#drum = :drum AND #drumMachine = :drumMachine",
+    TableName: TABLE_NAME,
+    FilterExpression: "#drum = :drum AND #drumMachine = :drumMachine",
     ExpressionAttributeValues: {
       ":drum": drumType,
       ":drumMachine": SampleTypes.DrumMachine.tr808,
@@ -132,30 +307,29 @@ export const getList = async (
 
     Select: "ALL_ATTRIBUTES",
     // ScanFilter: {
-      
-      
+
     //   // id:{
     //   //   ComparisonOperator: "CONTAINS",
     //   //   AttributeValueList:[{S:"a744be57-01f1-4308-902f-ec33657c08b9"}]
-
 
     //   // },
     //   // drum: {
     //   //   ComparisonOperator: "CONTAINS",
     //   //   AttributeValueList: [{ S: drumType }],
 
-
     //   // },
-    
+
     // },
-    
 
     //Limit: limit,
   });
   const results = await dynamo.send(command);
   console.log(`results = ${results.Count}`);
-  // const props:soundlistProps = {items:[], drumType:drumType};
-  return { items: results.Items as Sample[], drumType: drumType } as soundlistProps;
+  // const props:SoundListProps = {items:[], drumType:drumType};
+  return {
+    items: results.Items as Sample[],
+    drumType: drumType,
+  } as SoundListProps;
   const samples = results?.Items?.map((item) => {
     return {
       id: item.id.S,
@@ -201,15 +375,35 @@ export const getSampleByID = async (id: string) => {
   //const client = generateClient();
   const results = await client.graphql({
     query: getSample,
-
+    
     variables: {
       id: id,
+      
     },
+
     authMode: "apiKey",
   });
-  console.log(results.data.getSample?.name);
+  console.log(results.data.getSample);
   return results.data.getSample;
 };
+export const getSampleByIDWithDynamo = async (id: string) => {
+  //const client = generateClient();
+  const command = new QueryCommand({
+    TableName: TABLE_NAME,
+    KeyConditionExpression: "#id = :id",
+    //FilterExpression: "#id = :id",
+    ExpressionAttributeValues: {
+      ":id": id,
+    },
+    ExpressionAttributeNames: {
+      "#id": "id",
+    },
+    Select: "ALL_ATTRIBUTES",
+  });
+  const results = await dynamo.send(command);
+  console.log(results.Items);
+  return results.Items![0] as Sample;
+}
 export const getSamplesByName = async (name: string) => {
   //const client = generateClient();
   const results = await client.graphql({

@@ -4,7 +4,7 @@ import React from 'react'
 import * as SampleTypes from '../../ADMINISTRATION/src/interfaces'
 import { Sample } from '@/API'
 
-export default function DrumSelect({ updateValue, defaultDrum }: {  updateValue: any, defaultDrum: SampleTypes.Drum}) {
+export default function DrumSelect({ updateValue, defaultDrum }: {  updateValue: any, defaultDrum: any}) {
     
   return (
     <div>
@@ -19,11 +19,12 @@ export default function DrumSelect({ updateValue, defaultDrum }: {  updateValue:
             className='text-violet-900 bg-lime-400 w-28 h-6 text-center '
             onChange={(e) => {updateValue(e.target.value)}}
             >
-                {Object.keys(SampleTypes.Drum).map((key) => {
+                <option value="any">none</option>
+                {Object.keys(SampleTypes.Drum).sort().map((key) => {
                     return <option key={key}>{key}</option>
                 })}
             </select>
-            <p className='text-md text-amber-600 w-48'>Select Drum Type</p>
+            
         </div>
     </div>
   )

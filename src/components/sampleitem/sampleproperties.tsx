@@ -26,12 +26,14 @@ const SamplePropFieldSelect = ({
   fieldOBJ,
   updateFunc,
   value,
+  sample
 }: {
   fieldName: string;
   propName: string;
   fieldOBJ: object;
   updateFunc: any;
   value: any;
+  sample:Sample
 }) => {
   
   const color = getRandomColor();
@@ -40,7 +42,7 @@ const SamplePropFieldSelect = ({
   return (
     <div className="">
       <div className="flex gap-6">
-        <label htmlFor="" className={`w-32 pl-6 font-normal text-center text-${color}-400`}>
+        <label htmlFor="" className={`w-24 pl-6 font-normal text-center text-${color}-400`}>
           {fieldName}
         </label>
         <select
@@ -52,11 +54,11 @@ const SamplePropFieldSelect = ({
           //defaultValue={value}
           className={`text-black w-24`}
           onChange={(e) => {
-            updateFunc(e.target.value, propName);
+            updateFunc(e.target.value, propName,sample.id);
           }}
         >
           <option value="none">none</option>
-          {Object.keys(fieldOBJ).map((key) => {
+          {Object.keys(fieldOBJ).sort().map((key) => {
             return <option  key={key}>{key}</option>;
           })}
         </select>
@@ -67,11 +69,11 @@ const SamplePropFieldSelect = ({
 export default function SampleProperties({
   sample,
   updateValue,
-  currentValue,
+  
 }: {
   sample: Sample;
   updateValue: any;
-  currentValue?: any;
+  
 }) {
   //console.log("sample drum = ", sample?.drum!);
   const propertyTypes = [
@@ -90,9 +92,9 @@ export default function SampleProperties({
   //console.log("sampleproperty = ", sample)
   
   return (
-    <div>
+    <div className="text-xs flex flex-col items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900">
       <h1 className="font-extralight text-lime-400">edit sample properties</h1>
-      <div className="flex flex-row flex-wrap gap-2 p-4 justify-center items-center w-full">
+      <div className="flex flex-row flex-wrap gap-2 p-1 justify-center items-center w-full">
         {propertyTypes.map(({ name, prop, key }) => {
           let val = "none"
           try {
@@ -114,6 +116,7 @@ export default function SampleProperties({
                 fieldOBJ={prop}
                 updateFunc={updateValue}
                 value={val}
+                sample={sample}
               />
             </div>
           );
@@ -121,7 +124,7 @@ export default function SampleProperties({
         <div className="flex gap-6">
           <label
             htmlFor="reversed"
-            className="w-32 pl-6 text-center text-pink-300"
+            className="w-24 pl-6 text-center text-pink-300"
           >
             reversed
           </label>
@@ -132,7 +135,7 @@ export default function SampleProperties({
             name="reversed"
             id="reversed"
             className="w-24"
-            onChange={(e) => updateValue(e.target.checked, "reversed")}
+            onChange={(e) => updateValue(e.target.checked, "reversed",sample.id)}
           />
         </div>
         {/* <div className="flex gap-6">
