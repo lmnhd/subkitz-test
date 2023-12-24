@@ -252,7 +252,7 @@ function Home() {
           console.log("timeout");
           addSampleToBadArray(sample!, sampleIndex);
           clearTimeout(timeOut);
-        }, 5000);
+        }, 10000);
         const player = new Tone.Player(url, () => {
           console.log("loaded!!");
           clearTimeout(timeOut);
@@ -319,9 +319,9 @@ function Home() {
       const updatedSampleID = await updateSampleData(update);
       console.log("updatedSampleID", updatedSampleID);
 
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      const check = await getSampleByIDWithDynamo(updatedSampleID);
-      console.log("check => ", check);
+      // await new Promise((resolve) => setTimeout(resolve, 5000));
+      // const check = await getSampleByIDWithDynamo(updatedSampleID);
+      // console.log("check => ", check);
     }
   };
   // if(window){
