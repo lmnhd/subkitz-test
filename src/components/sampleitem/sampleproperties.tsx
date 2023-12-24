@@ -41,8 +41,8 @@ const SamplePropFieldSelect = ({
   //console.log("value = ", value);
   return (
     <div className="">
-      <div className="flex gap-6">
-        <label htmlFor="" className={`w-24 pl-6 font-normal text-center text-${color}-400`}>
+      <div className="flex md:gap-6">
+        <label htmlFor="" className={`w-16 md:w-24 md:pl-6 font-normal text-center text-${color}-400`}>
           {fieldName}
         </label>
         <select
@@ -52,7 +52,7 @@ const SamplePropFieldSelect = ({
     
           value={value}
           //defaultValue={value}
-          className={`text-black w-24`}
+          className={`text-black w-12 md:w-24`}
           onChange={(e) => {
             updateFunc(e.target.value, propName,sample.id);
           }}
@@ -124,7 +124,7 @@ export default function SampleProperties({
         <div className="flex gap-6">
           <label
             htmlFor="reversed"
-            className="w-24 pl-6 text-center text-pink-300"
+            className="w-12 md:w-24 md:pl-6 text-center text-pink-300"
           >
             reversed
           </label>
@@ -134,7 +134,7 @@ export default function SampleProperties({
             title="reversed"
             name="reversed"
             id="reversed"
-            className="w-24"
+            className="w-10 md:w-24"
             onChange={(e) => updateValue(e.target.checked, "reversed",sample.id)}
           />
         </div>
