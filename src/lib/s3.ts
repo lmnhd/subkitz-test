@@ -1,6 +1,7 @@
 "use server";
 import { Amplify } from "aws-amplify";
 
+
 import { list, getUrl, downloadData, uploadData } from "aws-amplify/storage";
 import { generateClient } from "aws-amplify/api";
 import { getSample, listSamples } from "@/graphql/queries";
@@ -40,13 +41,13 @@ export const assumeRole = async () => {
       // duration set for the role.
       DurationSeconds: 900,
     });
-    const response = await sts.send(command);
-    console.log(response);
+    // const response = await sts.send(command);
+    // console.log(response);
   } catch (err) {
     console.error(err);
   }
 };
-assumeRole();
+//assumeRole();
 
 
 Amplify.configure({
@@ -81,12 +82,15 @@ Amplify.configure({
 const client = generateClient();
 const dynamo = new DynamoDBClient({
   region: "us-east-1",
+  
+
   credentials:{
-    accessKeyId: "",
-    secretAccessKey:"",
+    accessKeyId: "AKIAZB7AIMRLI3YFXHCR",
+    secretAccessKey:"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",
+    //sessionToken
 
   }
-  , endpoint: "",
+  // , endpoint: "",
 
 });
 const docClient = DynamoDBDocumentClient.from(dynamo);
