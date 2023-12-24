@@ -51,7 +51,6 @@ Amplify.configure({
       defaultAuthMode: "apiKey",
       apiKey: "da2-x5h2lmi54jbnfk6znwohqweqou",
     },
-    
   },
   Storage: {
     S3: {
@@ -60,7 +59,6 @@ Amplify.configure({
       //dangerouslyConnectToHttpEndpointForTesting: 'true',
     },
   },
-
 });
 
 export type SoundListProps = {
@@ -80,12 +78,10 @@ function Home() {
   const [badFileArray, setBadFileArray] =
     useState<{ sample: Sample; indexInList: number }[]>();
   const [listLength, setListLength] = useState<number>(50);
-  const listLengthOptions = [10, 20, 50, 100, 200];
+  const listLengthOptions = [10, 20, 50, 100, 200, 500, 1000];
 
-  // new Tone.Player().toDestination()
-  //const dynamo = dbClient();
-
-  const client = generateClient();
+ 
+  //const client = generateClient();
 
   useEffect(() => {
     const load = async () => {
@@ -356,12 +352,12 @@ function Home() {
     "bg-gradient-to-br from-gray-900 via-slate-800 to-gray-800",
     "bg-gradient-to-br from-slate-900 via-gray-800 to-slate-800",
     "bg-gradient-to-br from-violet-900 via-purple-950 to-violet-800",
-  ]
+  ];
   const getDrumColor = (drum: string) => {
     const drumArray = Object.keys(SampleTypes.Drum);
     const index = drumArray.findIndex((item) => item === drum);
     return colorArray[index];
-  }
+  };
   return (
     <main className="flex min-h-screen flex-col items-center justify-between py-8">
       <h1 className="text-4xl font-bold text-center text-amber-500">
@@ -370,7 +366,7 @@ function Home() {
       <p className="w-2/3 ml-auto mr-10 text-right">
         rhythm composition repository by lmnhd
       </p>
-      <div className="flex flex-wrap gap-2 justify-around items-center my-6">
+      <div className="flex md:flex-row flex-col flex-wrap gap-2 justify-around items-center my-6">
         <div className="flex flex-col justify-center text-center items-center w-48">
           <p className="text-md text-amber-600 w-48">Select Drum Type</p>
           <DrumSelect updateValue={changeDrumList} defaultDrum={drumType} />
@@ -389,7 +385,7 @@ function Home() {
             })}
           </select>
         </div>
-        <div className="w-1/2 border-[1px] border-lime-900 p-1 rounded-sm">
+        <div className="md:w-1/2 border-[1px] border-lime-900 p-1 rounded-sm">
           <SampleProperties sample={audio!} updateValue={updateSampleEntry} />
         </div>
         <div>
@@ -398,8 +394,8 @@ function Home() {
             className="w-28 h-28 text-center rounded-2xl text-sm p-1 bg-gradient-to-br from-violet-900 via-purple-950 to-violet-500 text-lime-300 hover:from-red-900 hover:via-fuchsia-800 hover:to-red-500"
             onClick={() => samplePlayCurrentSound()}
           >
-            {`${audio?.name.trim().split(".")[0].substring(0, 7)}...`} <br/>
-            {currentSoundIndex !== -1 &&  currentSoundIndex + 1}
+            {`${audio?.name.trim().split(".")[0].substring(0, 7)}...`} <br />
+            {currentSoundIndex !== -1 && currentSoundIndex + 1}
           </Button>
         </div>
       </div>
