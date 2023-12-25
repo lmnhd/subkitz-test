@@ -37,7 +37,7 @@ useEffect(() => {
   
   
   return (
-    <div className="flex flex-row items-center justify-center m-1">
+    <div className="flex md:flex-row flex-wrap items-center justify-center m-1 ">
       {Array(numSteps).fill(0).map((num, ledIndex) => {
         return (
           <p

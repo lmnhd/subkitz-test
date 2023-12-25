@@ -30,7 +30,7 @@ const KeyPad = ({ rowNum, stepNum, selected, onPadClicked }: KeyPadType) => {
   return (
     <div
       className={cn(
-        `flex items-center justify-center w-12 h-12 p-2 mx-1 text-white border-2 border-black cursor-pointer`,
+        `flex items-center justify-center w-6 h-6 md:w-12 md:h-12 md:p-2 mx-1 text-white border-2 border-black cursor-pointer`,
         isActive && `bg-red-900`
       )}
       onClick={updateThisPad}
@@ -180,14 +180,14 @@ const setUpSamples = async () => {
     await Tone.Transport.start();
   }
   return (
-    <main className="flex flex-col items-center justify-between min-h-screen p-24 text-white">
+    <main className="flex flex-col items-center justify-between min-h-screen py-12 md:p-24 text-white">
       <h1>beat box</h1>
-      <div className="">
+      <div className="w-fit ">
          <LedStrip start={isPlaying} numSteps={numSteps} />
-        <div className="flex flex-col p-3 bg-red-400">
+        <div className="flex  flex-col p-3 bg-red-400">
           {keypads.map((row, rowNum) => {
             return (
-              <div key={`row-${rowNum}`} className="flex flex-row m-1">
+              <div key={`row-${rowNum}`} className="flex flex-wrap md:flex-nowrap items-center justify-center mx-auto md:flex-row m-1">
                 {row.map((keypad: any, stepNum: any) => {
                   return <KeyPad key={`step-${stepNum}`} {...keypad} onPadClicked={updatePad} />;
                 })}
