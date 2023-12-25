@@ -47,13 +47,7 @@ export default function KitLab() {
   const numSteps = 16;
   const { soundList, setSoundList } = useContext(KitzContext);
   const [keypads, setKeypads] = useState<any[]>([]);
-  const synth = new Tone.Synth().toDestination();
-  const [synths, setSynths] = useState<any[]>([
-    new Tone.MembraneSynth().toDestination(),
-    new Tone.DuoSynth().toDestination(),
-    new Tone.AMSynth().toDestination(),
-    new Tone.Synth().toDestination(),
-  ]);
+ 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   //let isPlaying = false;
   useEffect(() => {
@@ -76,12 +70,7 @@ export default function KitLab() {
     renderSteps();
   }, []);
   const [index, setIndex] = useState(0);
-  // const [synths, setSynths] = useState<any[]>([
-  //   new Tone.Synth().toDestination().oscillator.type = "triangle",
-  //   new Tone.Synth().toDestination().oscillator.type = "sine",
-  //   new Tone.Synth().toDestination().oscillator.type = "square",
-  //   new Tone.Synth().toDestination().oscillator.type = "sawtooth",
-  // ]);
+ 
   const [samples, setSamples] = useState<Tone.Player[]>([]);
   const [notes, setNotes] = useState(["C2", "E3", "G3", "B3"]);
 

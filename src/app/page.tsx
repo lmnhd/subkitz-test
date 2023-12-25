@@ -343,26 +343,26 @@ function Home() {
     return colorArray[index];
   };
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between py-8">
+    <main className="flex flex-col items-center justify-between min-h-screen py-8">
       <h1 className="text-4xl font-bold text-center text-amber-500">
         SUBKITZ...
       </h1>
       <p className="w-2/3 ml-auto mr-10 text-right">
         rhythm composition repository by lmnhd
       </p>
-      <div className="flex md:flex-row flex-col flex-wrap gap-2 justify-around items-center my-6">
-        <div className="flex flex-col justify-center text-center items-center w-48">
-          <p className="text-md text-amber-600 w-48">Select Drum Type</p>
+      <div className="flex flex-col flex-wrap items-center justify-around gap-2 my-6 md:flex-row">
+        <div className="flex flex-col items-center justify-center w-48 text-center">
+          <p className="w-48 text-md text-amber-600">Select Drum Type</p>
           <DrumSelect updateValue={changeDrumList} defaultDrum={drumType} />
 
-          <p className="text-md text-amber-300 w-48">limit</p>
+          <p className="w-48 text-md text-amber-300">limit</p>
           <select
             name="listLength"
             id="listLength"
             title="listLength"
             value={listLength}
             onChange={(e) => setListLength(Number(e.target.value))}
-            className="text-slate-600 bg-lime-400 w-28 h-6 text-center "
+            className="h-6 text-center text-slate-600 bg-lime-400 w-28 "
           >
             {listLengthOptions.map((num) => {
               return <option key={num}>{num}</option>;
@@ -375,7 +375,7 @@ function Home() {
         <div>
           <Button
             content="Click Me"
-            className="w-28 h-28 text-center rounded-2xl text-sm p-1 bg-gradient-to-br from-violet-900 via-purple-950 to-violet-500 text-lime-300 hover:from-red-900 hover:via-fuchsia-800 hover:to-red-500"
+            className="p-1 text-sm text-center w-28 h-28 rounded-2xl bg-gradient-to-br from-violet-900 via-purple-950 to-violet-500 text-lime-300 hover:from-red-900 hover:via-fuchsia-800 hover:to-red-500"
             onClick={() => samplePlayCurrentSound()}
           >
             {`${audio?.name.trim().split(".")[0].substring(0, 7)}...`} <br />
@@ -385,8 +385,8 @@ function Home() {
       </div>
 
       {badFileArray && badFileArray!.length > 0 && (
-        <div className="bg-slate-100 pb-1  h-24  overflow-y-auto relative">
-          <p className="text-lg text-center font-bold text-slate-300 z-10 sticky top-0 bg-slate-800 ">
+        <div className="relative h-24 pb-1 overflow-y-auto bg-slate-100">
+          <p className="sticky top-0 z-10 text-lg font-bold text-center text-slate-300 bg-slate-800 ">
             {badFileArray!.length} Bad Samples!
           </p>
           <div className="bg-slate-800 ">
@@ -418,7 +418,7 @@ function Home() {
       )}
 
       <h1 className="text-4xl font-bold">{soundList.drumType}</h1>
-      <div className="flex flex-wrap gap-1 h-96 overflow-auto items-center justify-between  text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-1 overflow-auto text-sm h-96">
         {soundList &&
           soundList.items
             .filter((sound) => {
@@ -430,7 +430,7 @@ function Home() {
               return (
                 <div
                   key={sound.id}
-                  className="p-1 flex items-center justify-center"
+                  className="flex items-center justify-center p-1"
                 >
                   <Button
                     key={sound.id}
