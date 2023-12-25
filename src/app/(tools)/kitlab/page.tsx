@@ -183,7 +183,7 @@ const setUpSamples = async () => {
     <main className="flex flex-col items-center justify-between min-h-screen p-24 text-white">
       <h1>beat box</h1>
       <div className="">
-        {/* <LedStrip start={isPlaying} numSteps={numSteps} /> */}
+         <LedStrip start={isPlaying} numSteps={numSteps} />
         <div className="flex flex-col p-3 bg-red-400">
           {keypads.map((row, rowNum) => {
             return (
