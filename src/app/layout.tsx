@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-
+import { KitzContext, KitzProvider } from "@/lib/kitzcontext";
 import { Amplify } from 'aws-amplify'
 import '@aws-amplify/ui-react/styles.css'
 import { Dhurjati } from 'next/font/google'
@@ -50,7 +50,9 @@ function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`bg-gradient-to-b from-slate-950 to-slate-800 ${dhurjati.className}`}>{children}</body>
+      <KitzProvider>
+        <body className={`bg-gradient-to-b from-slate-950 to-slate-800 ${dhurjati.className}`}>{children}</body>
+      </KitzProvider>
     </html>
   )
 }

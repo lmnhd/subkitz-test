@@ -220,13 +220,13 @@ export type dynamoQueryScanProps = {
   drumMachine?: SampleTypes.DrumMachine;
   name?: string
 }
-export const getListFromDynamo = async () => {
+export const getListFromDynamo = async (lastEvaluatedKey:string = "") => {
 
   const command = new ScanCommand({
     TableName: TABLE_NAME,
     Select: "ALL_ATTRIBUTES",
    Limit: 1000,
-
+    ExclusiveStartKey: lastEvaluatedKey ? {id: lastEvaluatedKey} : undefined,
   });
 
   const results = await dynamo.send(command);
@@ -234,7 +234,8 @@ export const getListFromDynamo = async () => {
   console.log(`results = ${results.Count}`);
 
   return {
-    items: results.Items as Sample[]
+    items: results.Items as Sample[],
+    lastEvaluatedKey: results.LastEvaluatedKey?.id,
   } as SoundListProps;
   
 };
