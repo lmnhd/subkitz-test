@@ -327,7 +327,7 @@ function Home() {
         rhythm composition repository by lmnhd
       </p>
       <div className="flex flex-col flex-wrap items-center justify-around gap-2 my-6 md:flex-row">
-        <div className="flex flex-col items-center justify-center w-48 text-center">
+        <div className="flex flex-col items-center justify-center w-48 text-center border-[1px] border-lime-800 rounded-xl py-4">
           <p className="w-48 text-md text-amber-600">Select Drum Type</p>
           <DrumSelect updateValue={changeDrumList} defaultDrum={drumType} />
 
