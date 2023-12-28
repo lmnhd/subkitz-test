@@ -37,13 +37,13 @@ useEffect(() => {
   
   
   return (
-    <div className="flex md:flex-row flex-wrap items-center justify-center m-1 ">
+    <div className="flex md:flex-row flex-wrap? items-center justify-center m-1 w-fit ">
       {Array(numSteps).fill(0).map((num, ledIndex) => {
         return (
           <p
           key={`led-${ledIndex}`}
-            className={`w-12 h-3 mx-1 text-xs text-center align-text-top transition-opacity? duration-300 ease-out ${
-              ledIndex == ledStep ? "bg-green-500 opacity-100" : "bg-black opacity-0"
+            className={`w-6 md:w-12 h-3 mx-1 text-xs rounded-3xl text-center align-text-top transition-opacity? duration-300 ease-out ${
+              ledIndex == ledStep ? "bg-blue-500 opacity-100" : "bg-black opacity-0"
             } `}
           ></p>
         );

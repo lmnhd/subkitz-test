@@ -28,7 +28,9 @@
     "recursive-readdir": "^2.2.3",
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7",
-    "tone": "^14.7.77"
+    "tone": "^14.7.77",
+    "use-smooth-horizontal-scroll": "^0.7.0",
+    "vertical-slider": "^1.0.1"
   },
   "devDependencies": {
     "@types/howler": "^2.2.11",

@@ -79,6 +79,7 @@ input CreateSampleInput {
     tonal: Boolean!
     invalid: Boolean!
     sampleLength: Int!
+    quality: Number
     owner: String
 }
 
