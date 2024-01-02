@@ -15,9 +15,11 @@ export type SampleLoaderProps = {
   sampleBank: Sample[];
   player: Tone.Player | undefined | null;
   _setVolume: any;
-
+  sampleID: string;
+setSampleID:any;
   _drumType: string;
   _setDrumType: any;
+  
   sampleIdsToLoadOnCreate?: string[];
   sequences: SequenceGroup[];
   currentSequence: number;
@@ -34,6 +36,8 @@ export default function SampleLoader({
   _drumType,
   _setDrumType,
   _setVolume,
+  sampleID,
+  setSampleID,
   sampleIdsToLoadOnCreate,
   sequences,
   currentSequence,
@@ -44,7 +48,7 @@ export default function SampleLoader({
 }: SampleLoaderProps) {
   const [drumIndex, setDrumIndex] = useState<number>(0);
   const [volume, setVolume] = useState<number>(100);
-  const [sampleID, setSampleID] = useState<string>("");
+  
   const [drumType, setDrumType] = useState<string>(_drumType);
   const [sample, setSample] = useState<Sample | null>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -84,6 +88,7 @@ export default function SampleLoader({
     await loadSample(sample.id);
 
     setSampleID(sample.id);
+    
 
     _setDrumType(drum, index);
 
@@ -276,7 +281,7 @@ export default function SampleLoader({
       }
     };
     loadOnCreate();
-  }, [ sampleBank, sampleIdsToLoadOnCreate]);
+  }, []);
 
   useEffect(() => {
     

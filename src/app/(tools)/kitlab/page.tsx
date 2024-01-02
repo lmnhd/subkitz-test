@@ -3,7 +3,16 @@ import React, { useContext, useEffect, useState } from "react";
 import * as Tone from "tone";
 import * as SampleTypes from "../../../../ADMINISTRATION/src/interfaces";
 import SampleProperties from "@/components/sampleitem/sampleproperties";
-import { PlayCircle, PlayCircleIcon, StopCircle } from "lucide-react";
+import {
+  Disc2Icon,
+  DivideSquare,
+  FileIcon,
+  PlayCircle,
+  PlayCircleIcon,
+  StopCircle,
+  TornadoIcon,
+  UploadIcon,
+} from "lucide-react";
 
 import LedStrip from "@/components/sequencer/ledstrip";
 import { KitzContext, KitzProvider } from "@/lib/kitzcontext";
@@ -24,6 +33,7 @@ import {
 import { ClockContext } from "@/components/sequencer/clockcontext";
 import waves from "../../../../public/subkitz_waves.png";
 import Image from "next/image";
+import { Sample } from "@/API";
 
 export default function KitLab() {
   const {
@@ -31,16 +41,23 @@ export default function KitLab() {
     setSoundList,
   }: { soundList: SoundListProps; setSoundList: any } = useContext(KitzContext);
   const [numSequences, setNumSequences] = useState<number>(2);
-  
+
   const [mixerVolumes, setMixerVolumes] = useState<number[]>([]);
+  const [sampleIDs, setSampleIDs] = useState<string[]>([]);
   const [drumTypes, setDrumTypes] = useState<string[]>([]);
   const [currentBPM, setCurrentBPM] = useState<number>(100);
   const [currentSequence, setCurrentSequence] = useState<number>(0);
   const [nextSequence, setNextSequence] = useState<number>(-1);
   const [patternPlay, setPatternPlay] = useState<number>(1); //all, single, random;
- 
+
   const [copiedRow, setCopiedRow] = useState<SequenceRow>([]);
-  
+  const [savedKitsList, setSavedKitsList] = useState<any[]>([]);
+  const [currentSavedKitID, setCurrentSavedKitID] = useState<string>("");
+  const [currentSavedKitName, setCurrentSavedKitName] = useState<string>("");
+
+  const [samplesToLoadOnCreate, setSamplesToLoadOnCreate] = useState<any>([]);
+  const [pageLoading, setPageLoading] = useState<boolean>(false);
+
   const [scroll, setScroll] = useState<boolean>(false);
   const {
     currentStep,
@@ -73,6 +90,7 @@ export default function KitLab() {
   } = React.useContext(ClockContext);
   const { scrollContainerRef, handleScroll, scrollTo, isAtStart, isAtEnd } =
     useSmoothHorizontalScroll();
+  const _LocalStorageKitsFileName = "Kitz-Saved-Kits";
   let index1 = 0;
   let step = 0;
   let pattern = 0;
@@ -86,34 +104,211 @@ export default function KitLab() {
     Tone.Transport.bpm.value = currentBPM;
 
     for (let i = 0; i < numRows; i++) {}
+    setSavedKitsList(JSON.parse(localStorage.getItem(_LocalStorageKitsFileName)!));
   }, [soundList.items]);
+
   const startUpDrums = [
     { type: SampleTypes.Drum.kick, id: "" },
     { type: SampleTypes.Drum.snare, id: "" },
-    { type: SampleTypes.Drum.chat, id: "" },
+
     { type: SampleTypes.Drum.clap, id: "" },
+    { type: SampleTypes.Drum.chat, id: "" },
   ];
-  const getStartupDrumByIdOrRandom = (drumType: string, id?: string) => {
-    //console.log("getStartupDrumByIdOrRandom", drumType, id)
+  const getStartupDrumsByIdOrRandom = () => {
+    console.log("getStartupDrumByIdOrRandom");
     if (soundList.items.length === 0) {
       console.log("no samples");
       return [""];
     }
     //return ""
-    const result = [];
-    if (id) {
-      return [""];
-    } else {
-      for (let i = 0; i < 5; i++) {
-        const randomSamples = soundList.items.filter((sample) => {
-          return sample.drum === drumType;
-        });
+    const result: string[][] = [];
+
+    for (let t = 0; t < startUpDrums.length; t++) {
+      const _drumType = startUpDrums[t].type;
+      console.log("found drumType", _drumType);
+
+      const randomSamples = soundList.items.filter((sample) => {
+        return sample.drum === _drumType;
+      });
+      //now get 5 random samples for this drumtype
+      const multiplesArray = [];
+      for (let s = 0; s < 5; s++) {
         const randomIndex = Math.floor(Math.random() * randomSamples.length);
-        result.push(randomSamples[randomIndex]!.id);
+        multiplesArray.push(randomSamples[randomIndex]!.id);
       }
 
-      return result;
+      result.push(multiplesArray);
     }
+    setSamplesToLoadOnCreate(result);
+    return result;
+  };
+
+  const reRandomizePlayers = async () => {
+    console.log("re-randomizing players...");
+    // setSamplesToLoadOnCreate([])
+    // setPlayers([])
+    // return;
+
+    const _players = [...players];
+    for (let i = 0; i < players.length; i++) {
+      const drumType = drumTypes[i];
+      const filteredSamples = soundList.items.filter((sample) => {
+        return sample.drum === drumType;
+      });
+      const randomIndex = Math.floor(Math.random() * filteredSamples.length);
+      const randomSample = filteredSamples[randomIndex]!;
+      await loadPlayer(_players[i], randomSample!);
+    }
+    setPlayers(_players);
+    console.log("players", _players);
+  };
+
+  const setSampleID = (id: string, index: number) => {
+    console.log("setSampleID", id, index);
+    const _sampleIDs = [...sampleIDs];
+    if (_sampleIDs.length === 0) {
+      for (let i = 0; i < numRows; i++) {
+        _sampleIDs.push("");
+      }
+    }
+    // if(index > _sampleIDs.length - 1){
+    //   _sampleIDs.push(id);
+    // }else{
+    //   _sampleIDs[index] = id;
+    // }
+    _sampleIDs[index] = id;
+
+    setSampleIDs([..._sampleIDs]);
+  };
+  const getDateAsIDString = () => {
+    const date = new Date();
+    const dateString = `${date.getFullYear()}${date.getMonth()}${date.getDay()}${date.getHours()}${date.getMinutes()}${date.getSeconds()}`;
+    return dateString;
+  };
+
+  const updateSavedKitNamesInLocalStorage = (nameOfKit: string) => {
+    let savedKitNames = localStorage.getItem(_LocalStorageKitsFileName);
+    if (!savedKitNames) {
+      savedKitNames = JSON.stringify([]);
+    }
+    const _savedKitNames: any[] = JSON.parse(savedKitNames);
+    const _newSavedKitNames = _savedKitNames.filter((kit) => {
+      return kit.name !== nameOfKit;
+    });
+    const savedKit = {
+      name: nameOfKit,
+      date: new Date(),
+      id: getDateAsIDString(),
+    };
+    _newSavedKitNames.push(savedKit);
+    localStorage.setItem(
+      _LocalStorageKitsFileName,
+      JSON.stringify(_newSavedKitNames)
+    );
+    setSavedKitsList(_newSavedKitNames);
+    setCurrentSavedKitID(savedKit.id);
+    setCurrentSavedKitName(savedKit.name);
+    return savedKit;
+  };
+  const saveSequencesToLocalStorage = async () => {
+    //Ask user to name the kit and store as variable
+    await stop();
+    setPageLoading(true)
+    const kitName = prompt("Please enter a name for this kit", currentSavedKitName ? currentSavedKitName : "My Kit 1");
+    if (!kitName) {
+      return;
+    }
+    const savedKit = updateSavedKitNamesInLocalStorage(kitName);
+
+    //create a kit object
+
+    console.log("saveAllToLocalStorage");
+    const _sequences = sequences;
+    const _samples = sampleIDs;
+    const _volumes = mixerVolumes;
+    const _drumTypes = drumTypes;
+    const _numRows = numRows;
+    const _numSteps = numSteps;
+    const _currentSequence = currentSequence;
+    const _currentBPM = currentBPM;
+    const _patternPlay = patternPlay;
+    const _samplesToLoadOnCreate = samplesToLoadOnCreate;
+
+    const _kitz = {
+      tempo:currentBPM,
+      sequences: _sequences,
+      samples: _samples,
+      volumes: _volumes,
+      drumTypes: _drumTypes,
+      numRows: _numRows,
+      numSteps: _numSteps,
+      currentSequence: _currentSequence,
+      currentBPM: _currentBPM,
+      patternPlay: _patternPlay,
+      samplesToLoadOnCreate: _samplesToLoadOnCreate,
+      id: savedKit.id,
+      name: savedKit.name,
+      date: savedKit.date,
+    };
+    localStorage.setItem(`KitzSeqSam-${savedKit.id}`, JSON.stringify(_kitz));
+    setPageLoading(false)
+    // setCurrentSavedKitID(savedKit.id);
+    // setCurrentSavedKitName(savedKit.name);
+
+  };
+
+  const loadAllFromStorage = async (id: string) => {
+    await stop()
+    setPageLoading(true)  
+
+    console.log("loadAllFromStorage", id);
+    const _kitz = JSON.parse(localStorage.getItem(`KitzSeqSam-${id}`)!);
+    console.log("kitz", _kitz);
+    if (_kitz) {
+      setCurrentBPM(_kitz.tempo!);
+      setSequences(_kitz.sequences);
+      setSampleIDs(_kitz.samples);
+      setMixerVolumes(_kitz.volumes);
+      setDrumTypes(_kitz.drumTypes);
+      setNumRows(_kitz.numRows);
+      setNumSteps(_kitz.numSteps);
+      setCurrentSequence(_kitz.currentSequence);
+      setCurrentBPM(_kitz.currentBPM);
+      setPatternPlay(_kitz.patternPlay);
+      setSamplesToLoadOnCreate(_kitz.samplesToLoadOnCreate);
+      setCurrentSavedKitID(_kitz.id);
+      setCurrentSavedKitName(_kitz.name);
+    }
+    for(let i = 0; i < _kitz.samples.length; i++){
+      const sample = _kitz.samples[i] as string;
+      const player = players[i];
+      await loadPlayer(player, soundList.items.find((item) => item.id === sample! ) || soundList.items[0]!);
+    }
+    setPageLoading(false)
+  };
+
+  let timeOut: any;
+  const afterTimeout = (message?: string, callBack?: any) => {
+    if (message) {
+      console.log(message);
+    }
+    if (callBack) {
+      callBack();
+    }
+  };
+  const loadPlayer = async (player: Tone.Player, sample: Sample) => {
+    setPageLoading(true);
+    timeOut = setTimeout(() => {
+      afterTimeout("load player timed out...");
+    }, 10000);
+    const url = await getS3URL(sample.s3Path);
+    console.log("url", url);
+    try {
+      await player.load(url!);
+    } catch (error) {
+      console.log(error);
+    }
+    setPageLoading(false)
   };
   
   const updateNumRows = async (num: number) => {
@@ -605,12 +800,13 @@ export default function KitLab() {
   };
 
   return (
-    <main >
+    <>
+    {pageLoading ? <div className="page-loading"><div className="page-loading-inner"><div className="page-loading-inner-inner">Loading...</div></div></div> : <main>
       <div className=" flex justify-center items-center fixed top-20 h-screen w-screen blur-md  opacity-60 animate-pulse -z-20">
-        <Image 
-        src={waves} 
-        alt="waves"
-        className={`shadow-2xl shadow-lime-500`}
+        <Image
+          src={waves}
+          alt="waves"
+          className={`shadow-2xl shadow-lime-500`}
         />
       </div>
       <div className="flex flex-col items-center justify-between min-h-screen py-4 md:p-24  text-white opacity-90">
@@ -663,27 +859,73 @@ export default function KitLab() {
                       _drumType={drumTypes[index]}
                       _setDrumType={setDrumType}
                       _setVolume={setVolume}
-                      sampleIdsToLoadOnCreate={getStartupDrumByIdOrRandom(
-                        startUpDrums[index].type
-                      )}
+                      sampleIdsToLoadOnCreate={
+                        samplesToLoadOnCreate.length === 0
+                          ? getStartupDrumsByIdOrRandom()[index]
+                          : samplesToLoadOnCreate[index]
+                      }
                       sequences={sequences}
                       currentSequence={currentSequence}
                       numSteps={numSteps}
                       pattern={pattern}
                       players={players}
                       isPlaying={isPlaying}
+                      setSampleID={setSampleID}
+                      sampleID={sampleIDs[index]}
                     />
                   );
                 })}
             </div>
           )}
-        <Button
-          className={`text-xl w-32 border-pink-700 border-[1px] my-4 bg-indigo-800/50`}
-          onClick={play}
-        >
-          {isPlaying && <StopCircle size={48} color="red" />}
-          {!isPlaying && <PlayCircleIcon size={48} color="lime" />}
-        </Button>
+        <div className={`PLAY-STRIP flex flex-wrap items-center justify-center gap-10 mx-auto`}>
+          {savedKitsList.length > 0 && (
+            <div
+              className={`text-xl h-16 w-32 border-pink-700 border-[1px] my-4 bg-slate-800/50`}
+            >
+              <select 
+              className={`w-full h-fit my-auto bg-indigo-800/50`}
+              title="saved-kits-select"
+              
+              //value={currentSavedKitID}
+              onChange={(e) => {loadAllFromStorage(e.target.value)}}
+              //onSelect={(e) => {loadAllFromStorage(e.target.value)}}
+              
+              >
+                {savedKitsList.map((kit: any) => {
+                  return (
+                    <option
+                      className={`text-xl  w-full border-black border-[1px] my-4 bg-slate-800/50`}
+                      key={kit.id}
+                      value={kit.id}
+                     selected={kit.id === currentSavedKitID}
+                    >
+                      {kit.name}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          )}
+          <Button
+            className={`text-xl w-32 border-pink-700 border-[1px] my-4 bg-indigo-800/50`}
+            onClick={play}
+          >
+            {isPlaying && <StopCircle size={48} color="red" />}
+            {!isPlaying && <PlayCircleIcon size={48} color="lime" />}
+          </Button>
+          <Button
+            className={`text-xl w-32 border-pink-700 border-[1px] my-4 bg-indigo-800/50`}
+            onClick={reRandomizePlayers}
+          >
+            <TornadoIcon size={48} color="lime" />
+          </Button>
+          <Button
+            className={`text-xl w-32 border-pink-700 border-[1px] my-4 bg-indigo-800/50`}
+            onClick={saveSequencesToLocalStorage}
+          >
+            <UploadIcon size={48} color="lime" />
+          </Button>
+        </div>
         <div className="flex flex-wrap  mx-auto justify-center gap-4 md:gap-0 md:justify-between md:min-h-fit bg-slate-950/60 rounded-xl border-[1px] border-indigo-900 p-1 w-full items-center">
           <div className="float-left justify-center mx-5 text-left">
             Patterns:{" "}
@@ -756,6 +998,7 @@ export default function KitLab() {
           update sequence
         </button> */}
       </div>
-    </main>
+    </main>}
+    </>
   );
 }
