@@ -104,7 +104,10 @@ export default function KitLab() {
     Tone.Transport.bpm.value = currentBPM;
 
     for (let i = 0; i < numRows; i++) {}
-    setSavedKitsList(JSON.parse(localStorage.getItem(_LocalStorageKitsFileName)!));
+    const savedKits = localStorage.getItem(_LocalStorageKitsFileName);
+    if(savedKits){
+      setSavedKitsList(JSON.parse(savedKits));
+    }
   }, [soundList.items]);
 
   const startUpDrums = [
