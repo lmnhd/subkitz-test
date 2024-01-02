@@ -20,6 +20,8 @@ export const KitzProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const load = async () => {
       // const sampleList: SoundListProps = await getUnCategorizedList(50);
+      
+      if(soundList.items.length > 0){return}
       const props: dynamoQueryScanProps = {
         drumType: SampleTypes.Drum.kick,
         //limit: 50,
