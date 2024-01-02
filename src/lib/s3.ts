@@ -16,9 +16,10 @@ import {
 import * as SampleTypes from "../../ADMINISTRATION/src/interfaces";
 import { ListSamplesQueryVariables, Sample } from "@/API";
 import fs from "fs";
-import { SoundListProps } from "@/app/page";
+
 import { STSClient } from "@aws-sdk/client-sts";
 import { AssumeRoleCommand } from "@aws-sdk/client-sts";
+import { SoundListProps } from "@/app/(tools)/soundlibrary/page";
 // Set the AWS Region.
 const REGION = "us-east-1";
 // Create an AWS STS service client object.

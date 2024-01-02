@@ -15,14 +15,33 @@
     --background-end-rgb: 0, 0, 0;
   }
 }
-
+html {
+  /* background-image: url('https://p1.hiclipart.com/preview/360/805/78/riding-a-wave-blue-sound-wave-illustration-png-clipart.jpg');
+  background-size: cover; */
+  /* background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center; */
+}
+/* <a href="https://lovepik.com/images/png-sound.html">Sound Png vectors by Lovepik.com</a> */
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
+  
+  background-image: url('/subkitz_waves.png');
+  opacity: 0.9;
+  background-repeat: no-repeat;
+  background-position: top;
+  
+  
+  /* background-size: cover; */
+  background-color: black;
+  /* background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center; */
+  /* background: linear-gradient(
       to bottom,
       transparent,
       rgb(var(--background-end-rgb))
     )
-    rgb(var(--background-start-rgb));
+    rgb(var(--background-start-rgb)); */
 }
 ::-webkit-scrollbar {display:none;}

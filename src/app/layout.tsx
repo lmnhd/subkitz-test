@@ -1,11 +1,12 @@
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
+import Navbar from "@/components/navbar";
 
 import { KitzContext, KitzProvider } from "@/lib/kitzcontext";
-import { Amplify } from 'aws-amplify'
-import '@aws-amplify/ui-react/styles.css'
-import { Dhurjati } from 'next/font/google'
-import './globals.css'
-
+import { Amplify } from "aws-amplify";
+import "@aws-amplify/ui-react/styles.css";
+import { Dhurjati } from "next/font/google";
+import "./globals.css";
+import { ClockProvider } from "@/components/sequencer/clockcontext";
 
 // Amplify.configure({
 //   Auth: {
@@ -20,7 +21,7 @@ import './globals.css'
 //   API: {
 //     GraphQL: {
 //       endpoint:
-      
+
 //         "https://m27uptzxtzav7cooltu26qfdpa.appsync-api.us-east-1.amazonaws.com/graphql",
 //       region: "us-east-1",
 //       defaultAuthMode: "apiKey",
@@ -35,26 +36,29 @@ import './globals.css'
 //     },
 //   },
 // });
-const dhurjati = Dhurjati({ subsets: ['latin'], weight: ['400'] })
+const dhurjati = Dhurjati({ subsets: ["latin"], weight: ["400"] });
 //const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Subkitz',
-  description: 'bomb the beat',
-}
+  title: "Subkitz",
+  description: "organize your noise!",
+};
 
-function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <KitzProvider>
-        <body className={`bg-gradient-to-b from-slate-950 to-slate-800 ${dhurjati.className}`}>{children}</body>
-      </KitzProvider>
+      <ClockProvider>
+        <KitzProvider>
+          <body
+            className={`bg-gradient-to-b from-slate-950 to-slate-800 ${dhurjati.className}`}
+          >
+            <Navbar />
+            {children}
+          </body>
+        </KitzProvider>
+      </ClockProvider>
     </html>
-  )
+  );
 }
 
-export default RootLayout
+export default RootLayout;
