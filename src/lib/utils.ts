@@ -32,3 +32,18 @@ export const getDrumColor = (drum: string) => {
   const index = drumArray.findIndex((item) => item === drum);
   return DrumColorArray[index];
 };
+
+export const getDateAsIDString = () => {
+  const date = new Date();
+  const dateString = `${date.getFullYear()}${date.getMonth()}${date.getDay()}${date.getHours()}${date.getMinutes()}${date.getSeconds()}`;
+  return dateString;
+};
+
+export const landingPageHeaders = [
+  {text: "Quickly create drum kits for your next track!"},
+  {text: "Audition drum samples and SFX in your browser!"},
+  {text: "Industry quality samples collected from producers throughout the decades!"},
+  {text: "Largest sound library on the internet!"},
+  {text: "Package and download kits for use in your DAW!"},
+  {text: "AI powered beat generation!"},
+]

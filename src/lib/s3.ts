@@ -1,7 +1,6 @@
 "use server";
 import { Amplify } from "aws-amplify";
 
-
 import { list, getUrl, downloadData, uploadData } from "aws-amplify/storage";
 import { generateClient } from "aws-amplify/api";
 import { getSample, listSamples } from "@/graphql/queries";
@@ -12,6 +11,7 @@ import {
   DynamoDBDocumentClient,
   QueryCommand,
   ScanCommand,
+  PutCommand,
 } from "@aws-sdk/lib-dynamodb";
 import * as SampleTypes from "../../ADMINISTRATION/src/interfaces";
 import { ListSamplesQueryVariables, Sample } from "@/API";
@@ -20,12 +20,13 @@ import fs from "fs";
 import { STSClient } from "@aws-sdk/client-sts";
 import { AssumeRoleCommand } from "@aws-sdk/client-sts";
 import { SoundListProps } from "@/app/(tools)/soundlibrary/page";
+import { Step } from "@/components/sequencer/sequencertypes";
+import { getDateAsIDString } from "./utils";
+import { StepPatternSave, StepPatternSaves } from "@/saves/steppatternsaves";
 // Set the AWS Region.
 const REGION = "us-east-1";
 // Create an AWS STS service client object.
 const sts = new STSClient({ region: REGION });
-
-
 
 export const assumeRole = async () => {
   try {
@@ -50,7 +51,6 @@ export const assumeRole = async () => {
 };
 //assumeRole();
 
-
 Amplify.configure({
   Auth: {
     Cognito: {
@@ -63,8 +63,8 @@ Amplify.configure({
   },
   API: {
     GraphQL: {
-       endpoint:
-         "https://m27uptzxtzav7cooltu26qfdpa.appsync-api.us-east-1.amazonaws.com/graphql",
+      endpoint:
+        "https://m27uptzxtzav7cooltu26qfdpa.appsync-api.us-east-1.amazonaws.com/graphql",
       //endpoint: "wss://m27uptzxtzav7cooltu26qfdpa.appsync-realtime-api.us-east-1.amazonaws.com/graphql",
       region: "us-east-1",
       defaultAuthMode: "apiKey",
@@ -83,28 +83,25 @@ Amplify.configure({
 const client = generateClient();
 const dynamo = new DynamoDBClient({
   region: "us-east-1",
-  
 
-  credentials:{
+  credentials: {
     accessKeyId: process.env.NEXT_PUBLIC_ACCESS_KEY_ID || "",
     secretAccessKey: process.env.NEXT_PUBLIC_SECRET_KEY || "",
     //sessionToken
-
-  }
+  },
   // , endpoint: "",
-
 });
 const docClient = DynamoDBDocumentClient.from(dynamo);
 
 const TABLE_NAME = "Sample-iv37v7a55nd6tknm6gbqwfzcym-NONE";
 
-let SamplesCache:Sample[] = []
-export const SetSamplesCache = (samples:Sample[]) => {
+let SamplesCache: Sample[] = [];
+export const SetSamplesCache = (samples: Sample[]) => {
   SamplesCache = samples;
-}
+};
 export const GetSamplesCache = () => {
   return SamplesCache;
-}
+};
 export const listSamplesS3FolderContents = async (folderPath: string) => {
   const result = await list({
     prefix: folderPath, //"Base/Classic Kits/",
@@ -147,7 +144,6 @@ export const getUnCategorizedList = async (limit: number = 10) => {
         drum: {
           attributeExists: false,
           //eq: "snare",
-          
         },
         invalid: {
           eq: false,
@@ -162,15 +158,16 @@ export const getUnCategorizedList = async (limit: number = 10) => {
   });
   console.log(results.data.listSamples?.items.length);
 
-  const filteredList = results.data.listSamples?.items?.filter((item) => {
-    
-    // if(item?.drum?.includes("kick") || item?.drum?.includes("snare") || item?.drum?.includes("hat") || item?.drum?.includes("cymbal") || item?.drum?.includes("tom") || item?.drum?.includes("perc") || item?.drum?.includes("sam") || item?.drum?.includes("loop") || item?.drum?.includes("cl") || item?.drum?.includes("sub") || item?.drum?.includes("vox") || item?.drum?.includes("instrument")){
-    //   console.log("null?", item)
-    //   return false
-    //   //return item
-    // }else{return true}
-    return true
-  }).splice(0, limit);
+  const filteredList = results.data.listSamples?.items
+    ?.filter((item) => {
+      // if(item?.drum?.includes("kick") || item?.drum?.includes("snare") || item?.drum?.includes("hat") || item?.drum?.includes("cymbal") || item?.drum?.includes("tom") || item?.drum?.includes("perc") || item?.drum?.includes("sam") || item?.drum?.includes("loop") || item?.drum?.includes("cl") || item?.drum?.includes("sub") || item?.drum?.includes("vox") || item?.drum?.includes("instrument")){
+      //   console.log("null?", item)
+      //   return false
+      //   //return item
+      // }else{return true}
+      return true;
+    })
+    .splice(0, limit);
   return {
     items: filteredList,
     drumType: SampleTypes.Drum.sample,
@@ -201,7 +198,6 @@ export const getModifiedSamplesList = async (limit: number = 100) => {
   };
 };
 
-
 export type dynamoQueryScanProps = {
   drumType?: SampleTypes.Drum;
   limit?: number;
@@ -219,15 +215,14 @@ export type dynamoQueryScanProps = {
   loudness?: SampleTypes.Loudness;
   length?: SampleTypes.Length;
   drumMachine?: SampleTypes.DrumMachine;
-  name?: string
-}
-export const getListFromDynamo = async (lastEvaluatedKey:string = "") => {
-
+  name?: string;
+};
+export const getListFromDynamo = async (lastEvaluatedKey: string = "") => {
   const command = new ScanCommand({
     TableName: TABLE_NAME,
     Select: "ALL_ATTRIBUTES",
-   Limit: 1000,
-    ExclusiveStartKey: lastEvaluatedKey ? {id: lastEvaluatedKey} : undefined,
+    Limit: 1000,
+    ExclusiveStartKey: lastEvaluatedKey ? { id: lastEvaluatedKey } : undefined,
   });
 
   const results = await dynamo.send(command);
@@ -238,17 +233,14 @@ export const getListFromDynamo = async (lastEvaluatedKey:string = "") => {
     items: results.Items as Sample[],
     lastEvaluatedKey: results.LastEvaluatedKey?.id,
   } as SoundListProps;
-  
 };
 
-export const getListFromDynamoByNullValue = async (
- fieldToCheck: string
-) => {
+export const getListFromDynamoByNullValue = async (fieldToCheck: string) => {
   const command = new ScanCommand({
     //filter expression where drum not exists
     TableName: TABLE_NAME,
     FilterExpression: "attribute_not_exists(#field)",
-    
+
     // ExpressionAttributeValues: {
     //   ":drum": drumType,
     //   //":drumMachine": SampleTypes.DrumMachine.tr808,
@@ -264,7 +256,6 @@ export const getListFromDynamoByNullValue = async (
     // AttributesToGet: ["id", "name", "description", "drum"],
 
     Select: "ALL_ATTRIBUTES",
-    
 
     //Limit: limit,
   });
@@ -275,28 +266,23 @@ export const getListFromDynamoByNullValue = async (
     items: results.Items as Sample[],
     drumType: SampleTypes.Drum.sample,
   } as SoundListProps;
-  
 };
 export const getListFromDynamoByDrumValue = async (
- props: dynamoQueryScanProps
+  props: dynamoQueryScanProps
 ) => {
   const command = new ScanCommand({
-    
     TableName: TABLE_NAME,
     FilterExpression: "#drum = :drum",
-    
+
     ExpressionAttributeValues: {
       ":drum": props.drumType,
       //":drumMachine": SampleTypes.DrumMachine.tr808,
     },
     ExpressionAttributeNames: {
       "#drum": "drum",
-      
     },
-   
 
     Select: "ALL_ATTRIBUTES",
-    
 
     Limit: props.limit,
   });
@@ -307,7 +293,6 @@ export const getListFromDynamoByDrumValue = async (
     items: results.Items as Sample[],
     drumType: props.drumType,
   } as SoundListProps;
-  
 };
 export const getList = async (
   drumType: SampleTypes.Drum = SampleTypes.Drum.kick,
@@ -415,10 +400,9 @@ export const getSampleByID = async (id: string) => {
   //const client = generateClient();
   const results = await client.graphql({
     query: getSample,
-    
+
     variables: {
       id: id,
-      
     },
 
     authMode: "apiKey",
@@ -443,7 +427,7 @@ export const getSampleByIDWithDynamo = async (id: string) => {
   const results = await dynamo.send(command);
   console.log(results.Items);
   return results.Items![0] as Sample;
-}
+};
 export const getSamplesByName = async (name: string) => {
   //const client = generateClient();
   const results = await client.graphql({
@@ -573,4 +557,34 @@ export const uploadDataInBrowser = async (event: any) => {
   } catch (error) {
     console.log(error);
   }
+};
+
+//STEP PATTERN SAVES
+export const saveStepPatternToDynamo = async (
+  stepPattern: Step[],
+  drumType: string,
+  userID?: string
+) => {
+  const command = new PutCommand({
+    TableName: "StepPatternSaves",
+    Item: {
+      id: getDateAsIDString(),
+      drumType: drumType,
+      userID: userID,
+      global: true,
+      stepPattern: JSON.stringify(stepPattern),
+    },
+  });
+  const results = await dynamo.send(command);
+  console.log(results);
+  return results.Attributes as StepPatternSave
+};
+export const getAllStepPatternSaves = async () => {
+  const command = new ScanCommand({
+    TableName: "StepPatternSaves",
+    Select: "ALL_ATTRIBUTES",
+  });
+  const results = await dynamo.send(command);
+  console.log(results);
+  return results.Items;
 };

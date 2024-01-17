@@ -8,6 +8,7 @@ import Clock from "@/components/sequencer/clock";
 import { ClockContext } from "./clockcontext";
 
 import LedStrip from "./ledstrip";
+import { StepPatternSaves } from "@/saves/steppatternsaves";
 
 export default function SequencerSteps({
   numSequences,
@@ -27,6 +28,9 @@ export default function SequencerSteps({
   actionButtonHandler,
   _currentStep,
   isPlaying,
+  handleStepVolumeChanged,
+  stepPatternSaves
+
 }: {
   numSequences: number;
   sequences: SequenceGroup[];
@@ -45,6 +49,8 @@ export default function SequencerSteps({
   actionButtonHandler: any;
   _currentStep: number;
   isPlaying: boolean;
+  handleStepVolumeChanged: any;
+  stepPatternSaves:StepPatternSaves
 }) {
   const [currentPattern, setCurrentPattern] = useState<number>(pattern);
   const {
@@ -69,8 +75,6 @@ export default function SequencerSteps({
     const stepChanged: any = (step: number) => {
       console.log("step changed.....", step);
     };
-   
-    
   }, []);
 
   const KeyPad = ({
@@ -82,74 +86,175 @@ export default function SequencerSteps({
     selectedColor = "bg-indigo-300",
     isPlaying,
     handleStepChanged,
+    localVolume = 100,
+    handleLocalVolumeChanged = (
+      rowNum: number,
+      stepNum: number,
+      value: number
+    ) => {
+      console.log("local volume changed", rowNum, stepNum, value);
+    },
   }: Step) => {
     const [isActive, setIsActive] = useState(selected);
     const [rollActive, setRollActive] = useState(roll);
-
+    const [currentVolume, setCurrentVolume] = useState(localVolume);
+    const volumeMax = 106;
+    const volMin = 85;
+    let _vol = 80;
     const updateThisPad = () => {
       setIsActive(!isActive);
       onPadClicked(rowNum, stepNum, "selected");
+      setCurrentVolume(100);
+      handleLocalVolumeChanged(rowNum, stepNum, 100);
       selected = !selected;
     };
-    const doublClicked = () => {
+    const handleRollClicked = (e: any) => {
+      //e.preventDefault();
+      console.log("Roll selected...", e);
+      if (!isActive) {
+        return;
+      }
       setRollActive(!rollActive);
       onPadClicked(rowNum, stepNum, "roll");
       roll = !roll;
     };
+    const handleVolumeUp = () => {
+      if (currentVolume < volumeMax) {
+        setCurrentVolume(currentVolume + 3);
+        _vol = currentVolume + 3;
+        handleLocalVolumeChanged(rowNum, stepNum, currentVolume + 3);
+      }
+    };
+    const handleVolumeDown = () => {
+      if (currentVolume > volMin) {
+        setCurrentVolume(currentVolume - 3);
+        _vol = currentVolume - 3;
+        handleLocalVolumeChanged(rowNum, stepNum, currentVolume - 3);
+      }
+    };
+    const setTailWindVolume = (volume: number) => {
+      switch (volume) {
+        case 106:
+          return "h-[100%]";
+          break;
+        case 103:
+          return "h-[90%]";
+          break;
+        case 100:
+          return "h-[80%]";
+          break;
+        case 97:
+          return "h-[70%]";
+          break;
+        case 94:
+          return "h-[60%]";
+          break;
+        case 91:
+          return "h-[50%]";
+          break;
+        case 88:
+          return "h-[40%]";
+          break;
+        case 85:
+          return "h-[35%]";
+          break;
+        case 82:
+          return "h-[30%]";
+          break;
+        case 79:
+          return "h-[25%]";
+          break;
+        case 77:
+          return "h-[10px]";
+          break;
+        case 74:
+          return "h-[1px]";
+
+        default:
+          return "h-[1px]";
+          break;
+      }
+    };
     return (
-      <div
-        className={cn(
-          `flex items-center justify-center w-6 h-20 md:w-12 md:h-20 md:p-2 mx-1 text-white border-[1px] border-pink-300 rounded-xl hover:bg-lime-800 cursor-pointer `,
-          isActive && selectedColor,
-          rollActive && "border-4"
-        )}
-        onClick={updateThisPad}
-        onDoubleClick={doublClicked}
-      >
-        <span>{stepNum + 1}</span>
-        {/* <span>{currentStep + 1}</span> */}
+      <div>
+        <div
+          className={cn(
+            `relative flex items-center justify-center w-6 h-20 md:w-12 md:p-2 mx-1 text-white border-[1px] border-pink-300 rounded-xl md:hover:bg-lime-500/20 hover:border-lime-400 hover:border-2 hover:scale-y-110 cursor-pointer `,
+            isActive && selectedColor,
+            rollActive && isActive && "border-4"
+          )}
+        >
+          {isActive && <div className="absolute top-0">+</div>}
+          {/* TOP BUTTON */}
+          {isActive && (
+            <div
+              className="absolute top-0 left-0 rounded-t-xl w-full flex justify-center items-center h-[30%] bg-black/10 hover:bg-red-500/40"
+              onClick={handleVolumeUp}
+            >
+              {/* <div className="absolute w-6 md:w-12 h-full"></div> */}
+            </div>
+          )}
+          {/* CENTER-SELECT-AREA */}
+          <div
+            className={cn(
+              `absolute flex items-center justify-center w-5 ${
+                isActive ? "h-[40%]" : "h-[100%]"
+              } md:w-12 md:p-2 mx-1 text-white border-[1px]? z-[20] border-lime-300 rounded-none md:hover:bg-lime-800? cursor-pointer `
+              // isActive && selectedColor,
+              // rollActive && "border-4"
+            )}
+            onClick={updateThisPad}
+          ></div>
+          {/* VOLUME-BAR VISUAL ELEMENT*/}
+          {isActive && (
+            <div
+              className={cn(
+                `absolute bottom-0 w-6 ${setTailWindVolume(
+                  currentVolume
+                )} md:w-10 md:p-2 mx-1 -z-[10]? rounded-b-xl bg-white/10 border-t-2 border-lime-400/40 `
+              )}
+            ></div>
+          )}
+          {/* BOTTOM BUTTON */}
+          {isActive && <div className="absolute bottom-0 -z-[10]?">-</div>}
+          {isActive && (
+            <div
+              className="absolute bottom-0 left-0 rounded-b-xl w-full flex justify-center items-center h-[30%] bg-black/10 hover:bg-red-500/40"
+              onClick={handleVolumeDown}
+            >
+              {/* <div className="absolute bottom-0 w-6 md:w-12 h-20px"></div>
+            <div  className="absolute">-</div> */}
+            </div>
+          )}
+          <span>{stepNum + 1}</span>
+        </div>
+        <div
+          title="roll"
+          className={` my-3 flex  items-center justify-center cursor-crosshair md:hover:bg-lime-400/40 text-center bg-black/30 rounded-xl h-6 text-white/20 ${
+            isActive ? "text-white/70" : "text-white/10"
+          } ${
+            rollActive && isActive
+              ? getDrumColor(drumTypes[rowNum])
+              : "bg-black/30"
+          }`}
+          //  className={` my-3 flex  items-center justify-center cursor-crosshair md:hover:bg-lime-400/40 text-center bg-black/30 rounded-xl h-6 text-white/20 ${isActive && !rollActive ?  'bg-lime-400/10 text-white/30 opacity-50' : 'bg-black/30 text-white/20 opacity-30'} ${isActive &&rollActive ? 'bg-lime-indigo/80 text-white opacity-100' : 'bg-black/30 text-white/20 opacity-0?'}`}
+          onClick={handleRollClicked}
+        >
+          roll
+        </div>
       </div>
     );
   };
   //console.log("currentBPM", bpm);
   //console.log("currentPattern", pattern);
-
   
-
-  const ActionButton = ({
-    actionName,
-    actionHandler,
-    currentRow,
-  }: {
-    actionName: string;
-    actionHandler?: any;
-    currentRow: number;
-  }) => {
-    return (
-      <Button
-        className="w-12 border-[1px] border-black h-full shadow-sm bg-black/20 text-violet-300/30 rounded-lg hover:text-white"
-        onClick={() => actionButtonHandler(actionName, currentRow)}
-      >
-        {actionName}
-      </Button>
-    );
-  };
-  const rowActions = [
-    { name: "clear", handler: () => {} },
-    { name: "copy", handler: () => {} },
-    { name: "paste", handler: () => {} },
-    { name: "step1", handler: () => {} },
-    { name: "step2", handler: () => {} },
-    { name: "step4", handler: () => {} },
-    { name: "step8", handler: () => {} },
-  ];
   const renderSequencerSteps = async () => {
-    console.log("rendering sequencer steps for pattern - ", pattern);
+    //console.log("rendering sequencer steps for pattern - ", pattern);
     console.log("sequences length", sequences.length);
     //if(sequences.length === 0) return <></>
     if (sequences.length > 0 && sequences[0].length > 0) {
-      console.log("sequences set", sequences);
-      console.log("pattern", pattern);
+      //console.log("sequences set", sequences);
+      //console.log("pattern", pattern);
       //console.log('currentPattern', currentPattern)
       const new_Sequences = sequences;
       setKeyPads(new_Sequences);
@@ -158,16 +263,17 @@ export default function SequencerSteps({
     //const renderActionButtons = () => {};
 
     const new_sequences = Array(numSequences).fill(0);
-    const rows = Array(numRows).fill(0);
-    const steps = Array(numSteps).fill(0);
+    const rows: SequenceRow[] = Array(numRows).fill(0);
+    const steps: SequenceRow = Array(numSteps).fill(0);
     const curSequenceArray = new_sequences.map((sequence, sequenceNum) => {
       return rows.map((row, rowNum) => {
         return steps.map((step, stepNum) => {
           return {
             rowNum,
             stepNum,
-            selected: false,
             roll: false,
+            selected: false,
+            localVolume: 100,
           };
         });
       });
@@ -187,13 +293,43 @@ export default function SequencerSteps({
     setMixerVolumes(_volumes);
     setDrumTypes(_drumTypes);
 
-    console.log("new sequences", curSequenceArray);
+    //console.log("new sequences", curSequenceArray);
   };
+  const loadStepPatternSavesArray = (drumType:string) => {
+    return stepPatternSaves.filter((stepPatternSave) => {
+      return stepPatternSave.drumType === drumType
+    })
+  }
+  
+  
   useEffect(() => {
     renderSequencerSteps();
     //sequencePattern();
   }, [pattern, currentPattern, bpm, playMode, renderSequencerSteps]);
 
+  const getRowActionsPanel = (rowNum:number) => {
+    const rowActions = [
+      { name: "clear" },
+      { name: "copy" },
+      { name: "paste" },
+      { name: "fill", variations: ["sty1", "sty2", "sty3", "sty4", "sty5"] },
+  
+      { name: "step1" },
+      { name: "step2" },
+      { name: "step4" },
+      { name: "step8" },
+      { name: "save"},
+      { name: drumTypes[rowNum] + "-" + '0', variations: loadStepPatternSavesArray(drumTypes[rowNum]).map((stepPatternSave, indexD) => {
+        //console.log("stepPatternSave", stepPatternSave, indexD)
+        //if(indexD > 0) {
+          return drumTypes[rowNum] + "-" + (indexD + 1)
+       //}
+      })
+        
+      },
+    ];
+    return rowActions;
+  }
   return (
     // <Clock
     //   isPlaying={isPlaying}
@@ -233,6 +369,7 @@ export default function SequencerSteps({
                               currentStep={-1}
                               //isPlaying={stepNum === step}
                               isPlaying={false}
+                              handleLocalVolumeChanged={handleStepVolumeChanged}
                             />
                           </>
                         );
@@ -247,13 +384,15 @@ export default function SequencerSteps({
                       />
                     </div>
                   </div>
-                  <div className="w-full flex justify-around gap-2 p-1  items-center bg-black/50 h-8 rounded-xl">
-                    {rowActions.map((action) => {
+                  <div className="w-full flex justify-around gap-2 p-1  items-center bg-black/50 h-8 rounded-xl mt-8">
+                    {getRowActionsPanel(index).map((action) => {
                       return (
                         <ActionButton
                           key={`action-${action.name}`}
                           actionName={action.name}
+                          variations={action.variations}
                           currentRow={index}
+                          actionButtonHandler={actionButtonHandler}
                         />
                       );
                     })}
@@ -267,3 +406,47 @@ export default function SequencerSteps({
     // </Clock>
   );
 }
+
+const ActionButton = ({
+  actionName,
+  variations,
+  currentRow,
+  actionButtonHandler,
+}: {
+  actionName: string;
+  variations?: string[];
+  currentRow: number;
+  actionButtonHandler: any;
+}) => {
+  //console.log("action button variations = ", variations)
+  const [currentVariation, setCurrentVariation] = useState<string>(actionName);
+  
+  const handleVariationChange = (variation: string) => {
+    console.log("action button variation = ", variation)
+  
+    
+    const nextVariation = variations![variations!.indexOf(currentVariation)! + 1] || actionName;
+    console.log("next variation", nextVariation)
+
+    
+
+    setCurrentVariation(nextVariation);
+    actionButtonHandler(currentVariation, currentRow);
+    console.log("variation changed", variation, nextVariation)
+  }
+  return variations !== undefined ? (
+    <Button
+      className="w-14 border-[1px] border-black h-full shadow-sm bg-black/20 text-violet-300/30 rounded-lg hover:text-white"
+      onClick={() => handleVariationChange(currentVariation)}
+    >
+      <span className={``}>{currentVariation.replace('-','')}</span>
+    </Button>
+  ) : (
+    <Button
+      className="w-14 border-[1px] border-black h-full shadow-sm bg-black/20 text-violet-300/30 rounded-lg hover:text-white"
+      onClick={() => actionButtonHandler(actionName, currentRow)}
+    >
+      <span className={``}>{actionName}</span>
+    </Button>
+  );
+};

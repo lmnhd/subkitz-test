@@ -36,13 +36,7 @@ export default function LedStrip({
       Tone.Transport.cancel();
       setLedStep(0);
     }
-    // if (start) {
-    //   await sequencePattern();
-    // }else{
-    //     Tone.Transport.stop();
-    //     Tone.Transport.cancel();
-    //     setLedStep(0);
-    // }
+    
   }, [start, numSteps]);
 
   return (
@@ -58,7 +52,7 @@ export default function LedStrip({
                 key={`led-${ledIndex}`}
                 className={`w-6 md:w-12 h-24 mx-1 p-2 py-4 text-xs rounded-xl text-center align-text-top mt-2   ${
                   ledIndex == ledStep
-                    ? `${bgColorTW} opacity-50`
+                    ? `${bgColorTW} opacity-30`
                     : "bg-black opacity-0"
                 } `}
               > </p>: 

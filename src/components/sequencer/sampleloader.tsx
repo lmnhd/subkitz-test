@@ -8,26 +8,27 @@ import { getS3URL } from "@/lib/s3";
 import { getDrumColor } from "@/lib/utils";
 import { VerticalRangeSlider } from "vertical-slider";
 import { Button } from "../ui/button";
-import { SequenceGroup, Step } from "./sequencertypes";
+import { SampleID, SequenceGroup, Step } from "./sequencertypes";
+import { clear } from "console";
 
 export type SampleLoaderProps = {
   index: number;
   sampleBank: Sample[];
   player: Tone.Player | undefined | null;
   _setVolume: any;
-  sampleID: string;
-setSampleID:any;
+  sampleIDs: SampleID[];
+
+  setSampleID: any;
   _drumType: string;
   _setDrumType: any;
-  
+  numRows: number;
   sampleIdsToLoadOnCreate?: string[];
   sequences: SequenceGroup[];
   currentSequence: number;
   numSteps: number;
   pattern: number;
   players: Tone.Player[];
-  isPlaying:boolean;
-
+  isPlaying: boolean;
 };
 export default function SampleLoader({
   index,
@@ -36,37 +37,38 @@ export default function SampleLoader({
   _drumType,
   _setDrumType,
   _setVolume,
-  sampleID,
+  sampleIDs,
+
   setSampleID,
   sampleIdsToLoadOnCreate,
   sequences,
   currentSequence,
   numSteps,
+  numRows,
   pattern,
   players,
-  isPlaying
+  isPlaying,
 }: SampleLoaderProps) {
   const [drumIndex, setDrumIndex] = useState<number>(0);
   const [volume, setVolume] = useState<number>(100);
-  
+
   const [drumType, setDrumType] = useState<string>(_drumType);
   const [sample, setSample] = useState<Sample | null>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
   const [drumReady, setDrumReady] = useState<boolean>(false);
   const [numTimeOuts, setNumTimeOuts] = useState<number>(5);
   const [tryLoadingCount, setTryLoadingCount] = useState<number>(0);
-
+  const [localSampleID, setLocalSampleID] = useState<string>("");
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [drumColor, setDrumColor] = useState<string>(getDrumColor(drumType));
 
   let index1 = 0;
   let step = 0;
-  
-  //sequencePattern()
- 
 
-  
+  //sequencePattern()
+
   const drumSelected = async (drum: string) => {
     //setDrumType("none")
 
@@ -87,8 +89,7 @@ export default function SampleLoader({
     console.log("firstID", sample.id);
     await loadSample(sample.id);
 
-    setSampleID(sample.id);
-    
+    setSampleID(sample.id, index);
 
     _setDrumType(drum, index);
 
@@ -109,7 +110,10 @@ export default function SampleLoader({
     setSampleID(id);
     await loadSample(id);
   };
+  //let wait: any;
   const handleGenerateRandomSample = async () => {
+    //setLoading(true)
+    let wait1;
     try {
       if (tryLoadingCount > numTimeOuts) {
         return;
@@ -120,24 +124,28 @@ export default function SampleLoader({
       });
       const sample = samples[Math.floor(Math.random() * samples.length)];
 
-      const wait = setTimeout(() => {
+      wait1 = setTimeout(() => {
         console.log(`Timed out - trying again...`);
         setTryLoadingCount(tryLoadingCount + 1);
         handleGenerateRandomSample();
       }, 10000);
       const result = await loadSample(sample.id);
       if (result) {
-        clearTimeout(wait);
+        clearTimeout(wait1);
         setTryLoadingCount(0);
         console.log(`Done generating sample row  ${index}`);
+        setLoading(false);
       }
     } catch (error) {
+      clearTimeout(wait1);
+      setLoading(false);
       console.log("ERROR GENERATING SAMPLE", error);
     }
   };
 
   const loadSample = async (id: string, foundSample?: Sample) => {
     console.log("loadSample", id);
+    setLoading(true);
     let sample;
     try {
       if (foundSample) {
@@ -149,8 +157,9 @@ export default function SampleLoader({
           return sample.id === id;
         });
       }
-  
+
       if (!sample) {
+        setLoading(false);
         return;
       }
       console.log("sample", sample);
@@ -164,21 +173,25 @@ export default function SampleLoader({
         player.connect(Tone.Destination);
         setLoaded(true);
         setSample(sample);
-  
-        setSampleID(sample.id);
+
+        setSampleID(sample.id, index);
+        setLocalSampleID(sample.id);
         setDrumColor(getDrumColor(sample.drum as string));
-  
+
         console.log("done loading sample");
+        console.log("SampleID for sampleloader...", sampleIDs[index]);
+        setLoading(false);
         return true;
       } else {
         console.log("player not loaded");
+        setLoading(false);
         return false;
       }
     } catch (error) {
-      console.log("error loading sample...",error)
+      console.log("error loading sample...", error);
     }
+    setLoading(false);
   };
-  
 
   async function sequencePattern() {
     index1 = 0;
@@ -186,7 +199,6 @@ export default function SampleLoader({
     Tone.Transport.scheduleRepeat(repeat, `${numSteps}n`);
     Tone.Transport.start();
   }
- 
 
   function repeat(time: any) {
     // console.log("Playing Sequence ", currentSequence)
@@ -227,32 +239,34 @@ export default function SampleLoader({
       setDrumType(sample.drum as string);
       console.log("firstID", sample.id);
       const result = await loadSample(sample.id);
-  
+
       if (result) {
-        setSampleID(sample.id);
-  
+        setSampleID(sample.id, index);
+        setLocalSampleID(sample.id);
+
         _setDrumType(sample.drum, index);
-  
+
         setDrumReady(true);
         return true;
       }
       return false;
     };
     const loadOnCreate = async () => {
+      let wait2: any;
       try {
         if (!sampleIdsToLoadOnCreate) {
           return;
         }
 
-        // console.log(
+        // console.log
         //   `Starting round ${counter} loading sample ${sampleIdsToLoadOnCreate[counter]}`
         // );
 
         const sampleIdToLoadOnCreate = sampleIdsToLoadOnCreate[counter++];
 
-        const sample = sampleBank.find((sample) => {
+        const sample: Sample = sampleBank.find((sample) => {
           return sample.id === sampleIdToLoadOnCreate;
-        });
+        }) as Sample;
 
         if (!sample) {
           if (counter < sampleIdsToLoadOnCreate.length) {
@@ -262,21 +276,22 @@ export default function SampleLoader({
             loadOnCreate();
           }
         }
-        const wait = setTimeout(() => {
+        let wait2 = setTimeout(() => {
           if (counter < sampleIdsToLoadOnCreate.length) {
             console.log(`Timed out - trying again...`);
             loadOnCreate();
           } else {
-            clearTimeout(wait);
+            clearTimeout(wait2);
             console.log(`problem loading ${counter} samples`);
           }
         }, 10000);
         const result = await loadStartUpDrum(sample!);
         if (result) {
-          clearTimeout(wait);
+          clearTimeout(wait2);
         }
         console.log(`All Done loading sample row ${counter}`);
       } catch (error) {
+        clearTimeout(wait2);
         console.log("ERROR LOADING SAMPLES", error);
       }
     };
@@ -284,7 +299,6 @@ export default function SampleLoader({
   }, []);
 
   useEffect(() => {
-    
     sequencePattern();
   }, [isPlaying]);
   const renderIndexOptions = () => {
@@ -296,7 +310,7 @@ export default function SampleLoader({
         return (
           <option
             value={sample.id}
-            selected={sample.id == sampleID}
+            selected={sample.id == localSampleID}
             className="text-black bg-slate-700"
             key={`${drumType}-${index}`}
           >
@@ -312,9 +326,14 @@ export default function SampleLoader({
         sequences[currentSequence][index][currentStep].selected
           ? "bg-lime-500"
           : drumColor
-      }`}
+      } `}
     >
-      <div className="flex h-fit w-60 py-1  flex-wrap border-[1px] border-indigo-900 rounded-xl bg-gradient-to-br from-gray-900/90 via-slate-900/80 to-gray-950/90 items-center justify-center">
+      <div
+        className={`flex h-fit w-60 py-1  flex-wrap border-[1px] border-indigo-900 rounded-xl bg-gradient-to-br from-gray-900/90 via-slate-900/80 to-gray-950/90 items-center justify-center transition-all ease-in-out duration-300 ${
+          loading &&
+          " blur-md opacity-30 shadow-xl shadow-lime-300/30 animate-ping"
+        }`}
+      >
         <div className="flex flex-col text-left">
           <label htmlFor="mixer">level</label>
           <input
@@ -356,15 +375,22 @@ export default function SampleLoader({
               {renderIndexOptions()}
             </select>
           )}
-          <Button
-            className="bg-violet-900/30 my-3 h-4 border-[1px] rounded-2xl border-violet-900 text-white-600"
-            onClick={handleGenerateRandomSample}
-          >
-            generate
-          </Button>
+          {true && (
+            <Button
+              className="bg-violet-900/30 my-3 h-4 border-[1px] rounded-2xl border-violet-900 text-white-600"
+              onClick={handleGenerateRandomSample}
+              disabled={loading}
+            >
+              generate
+            </Button>
+          )}
         </div>
       </div>
-      {isPlaying && <div className="flex flex-row items-center justify-center">{isPlaying}</div>}
+      {isPlaying && (
+        <div className="flex flex-row items-center justify-center">
+          {isPlaying}
+        </div>
+      )}
     </div>
   );
 }

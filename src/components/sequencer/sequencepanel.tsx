@@ -34,7 +34,7 @@ export default function SequencePanel({currentSequence,handleAddSequenceSelected
 
   useEffect(() => {
     renderSequences();
-    console.log("sequences", sequences);
+    //console.log("sequences", sequences);
   }, [
      sequences
   ]);

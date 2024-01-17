@@ -1,7 +1,7 @@
 "use client";
 import { Context, createContext, useEffect, useState } from "react";
 import * as Tone from "tone";
-import { Step } from "./sequencertypes";
+import { SequenceGroup, Step } from "./sequencertypes";
 
 export const ClockContext: Context<any> = createContext({
   currentStep: 0,
@@ -12,12 +12,12 @@ export const ClockProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [pattern, setPattern] = useState<number>(0);
-  const [sequences, setSequences] = useState<any>([]);
+  const [sequences, setSequences] = useState<SequenceGroup[]>([]);
   const [players, setPlayers] = useState<Tone.Player[]>([]);
   const [numRows, setNumRows] = useState<number>(4);
   const [numSteps, setNumSteps] = useState<number>(16);
   const [handleStepChanged, setHandleStepChanged] = useState<any>(undefined);
-
+  const [sampleIDs, setSampleIDs] = useState<{id:string,index:number}[]>([]);
 //   useEffect(() => {
 //     sequenceContextPattern();
 //   }, [isPlaying]);
@@ -28,8 +28,8 @@ export const ClockProvider = ({ children }: { children: React.ReactNode }) => {
   async function sequenceContextPattern() {
     index1 = 0;
 
-    Tone.Transport.scheduleRepeat(repeat, `${numSteps}n`);
-    Tone.Transport.start();
+    // Tone.Transport.scheduleRepeat(repeat, `${numSteps}n`);
+    // Tone.Transport.start();
   }
 
   function repeat(time: any) {
@@ -90,6 +90,8 @@ export const ClockProvider = ({ children }: { children: React.ReactNode }) => {
         numRows,
         step,
         setNumRows,
+        sampleIDs,
+        setSampleIDs
        
 
       }}
