@@ -4,9 +4,7 @@ import { getDrumColor, landingPageHeaders, DrumColorArray } from "@/lib/utils";
 import wave from '../../../../public/subkitz_waves.png'
 import * as SampleTypes from "../../../../ADMINISTRATION/src/interfaces";
 import Image from "next/image";
-import LedStrip from "../../../components/sequencer/ledstrip";
-import WaveDraw from "@/components/sampleitem/wavedraw";
-import WaveDraw2 from "@/components/sampleitem/wavedraw2";
+
 import WaveDraw3 from "@/components/sampleitem/wavedraw3";
 const drums = [
   "kick",
@@ -78,7 +76,7 @@ export default function BackStage() {
         {/* <div className="flex flex-wrap mx-auto gap-8 items-center justify-around">
             {generateBlocks()}
         </div> */}
-       <WaveDraw3/>
+       
     </div>
   );
 }
