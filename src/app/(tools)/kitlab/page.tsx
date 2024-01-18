@@ -22,7 +22,7 @@ import {
   saveStepPatternToDynamo,
 } from "@/lib/s3";
 import SampleLoader from "@/components/sequencer/sampleloader";
-import { SoundListProps } from "@/app/(tools)/soundlibrary/page";
+import { SoundListProps } from "@/lib/kitzcontext";
 import { Button } from "@aws-amplify/ui-react";
 import TempoControl from "@/components/sequencer/tempocontrol";
 import useSmoothHorizontalScroll from "use-smooth-horizontal-scroll";

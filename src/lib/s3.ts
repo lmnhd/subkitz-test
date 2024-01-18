@@ -19,7 +19,7 @@ import fs from "fs";
 
 import { STSClient } from "@aws-sdk/client-sts";
 import { AssumeRoleCommand } from "@aws-sdk/client-sts";
-import { SoundListProps } from "@/app/(tools)/soundlibrary/page";
+import { SoundListProps } from "./kitzcontext";
 import { Step } from "@/components/sequencer/sequencertypes";
 import { getDateAsIDString } from "./utils";
 import { StepPatternSave, StepPatternSaves } from "@/saves/steppatternsaves";

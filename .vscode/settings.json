@@ -1,5 +1,21 @@
 {
     "cSpell.words": [
         "subkitz"
-    ]
+    ],
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "src\\components\\sampleitem/sampleauditiontile (Lem-I5's conflicted copy 2024-01-13).tsx": true,
+        "**/sampleauditiontile (Lem-I5's conflicted copy 2024-01-13).tsx": true,
+        "sampleauditiontile (Lem-I5's conflicted copy 2024-01-13).tsx": true,
+        "src\\components\\sequencer/sequencersteps copy.tsx": true,
+        "**/sequencersteps copy.tsx": true,
+        "src\\app\\(tools)\\soundlibrary/page (Lem-I5's conflicted copy 2024-01-13).tsx": true,
+        "**/page (Lem-I5's conflicted copy 2024-01-13).tsx": true
+    },
+    "explorerExclude.backup": {}
 }

@@ -22,7 +22,6 @@ import {
 } from "@/lib/s3";
 
 import Image from "next/image";
-//import { dbClient } from "@/lib/dynamo";
 import { withAuthenticator } from "@aws-amplify/ui-react";
 import { Inter } from "next/font/google";
 import * as Tone from "tone";
@@ -39,7 +38,7 @@ import { KitzContext, SoundListProps } from "@/lib/kitzcontext";
 import AuditionTileStrip from "@/components/soundsets/auditiontilestrip";
 import { list } from "postcss";
 
-//amplifyConfigure()
+
 
 function Home() {
   const {
